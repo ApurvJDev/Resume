@@ -1,0 +1,46 @@
+Running with gitlab-runner 16.10.0 (81ab07f6)
+  on ip-10-11-78-176.ec2.internal zFmBvsmd, system ID: s_9b34e1758fb3
+Resolving secrets
+00:00
+Preparing the "docker" executor
+00:04
+Using Docker executor with image registry.gitlab.com/gitlab-org/release-cli:latest ...
+Pulling docker image registry.gitlab.com/gitlab-org/release-cli:latest ...
+Using docker image sha256:6ea0637172e1885c14f641b98322014821b21a7d93ea0cbb22eeb5ba192be95b for registry.gitlab.com/gitlab-org/release-cli:latest with digest registry.gitlab.com/gitlab-org/release-cli@sha256:696013aea0f2a20482800ce3a77341f840d7c7ec17bd78bd555e0bd6c00e4f11 ...
+Preparing environment
+00:01
+Running on runner-zfmbvsmd-project-5045-concurrent-0 via ip-10-11-78-176.ec2.internal...
+Getting source from Git repository
+00:01
+Fetching changes with git depth set to 20...
+Reinitialized existing Git repository in /builds/Apurv.Jadhav/gitlab-cicd-crash-course/.git/
+Checking out c1c80218 as detached HEAD (ref is v2.0.2)...
+Removing release_notes.md
+Skipping Git submodules setup
+Downloading artifacts
+00:01
+Downloading artifacts for prepare_job (5591422)...
+Downloading artifacts from coordinator... ok        host=gitlab.connectwisedev.com id=5591422 responseStatus=200 OK token=zZdz1vCL
+Executing "step_script" stage of the job script
+00:01
+Using docker image sha256:6ea0637172e1885c14f641b98322014821b21a7d93ea0cbb22eeb5ba192be95b for registry.gitlab.com/gitlab-org/release-cli:latest with digest registry.gitlab.com/gitlab-org/release-cli@sha256:696013aea0f2a20482800ce3a77341f840d7c7ec17bd78bd555e0bd6c00e4f11 ...
+$ if command -v docker &> /dev/null; then # collapsed multi-line command
+$ echo "Creating release"
+Creating release
+Executing "step_release" stage of the job script
+00:01
+$ if command -v docker &> /dev/null; then # collapsed multi-line command
+$ release-cli create --name "Release v2.0.2" --description "release_notes.md" --tag-name "v2.0.2" --ref "c1c8021869d650f40c846304b986186773b8784e" --assets-link "{\"url\":\"https:///v2-0-2:c1c8021869d650f40c846304b986186773b8784e\",\"name\":\"Container Image v2.0.2\"}"
+time="2024-06-11T17:38:40Z" level=info msg="Creating Release..." catalog-publish=false cli=release-cli command=create name="Release v2.0.2" project-id=5045 ref=c1c8021869d650f40c846304b986186773b8784e server-url="https://gitlab.connectwisedev.com" tag-message= tag-name=v2.0.2 version=0.18.0
+Tag: v2.0.2
+Name: Release v2.0.2
+Description: null
+Created At: 2024-06-11 17:38:40.381 +0000 UTC
+Released At: 2024-06-11 17:38:40.381 +0000 UTC
+Asset::Link::Name: Container Image v2.0.2
+Asset::Link::URL: https:///v2-0-2:c1c8021869d650f40c846304b986186773b8784e
+See all available releases here: https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases
+time="2024-06-11T17:38:40Z" level=info msg="release created successfully!" catalog-publish=false cli=release-cli command=create name="Release v2.0.2" project-id=5045 ref=c1c8021869d650f40c846304b986186773b8784e server-url="https://gitlab.connectwisedev.com" tag-message= tag-name=v2.0.2 version=0.18.0
+Cleaning up project directory and file based variables
+00:01
+Job succeeded
