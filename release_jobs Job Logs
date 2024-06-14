@@ -1,0 +1,37 @@
+Running with gitlab-runner 16.10.0 (81ab07f6)
+  on ip-10-11-38-177.ec2.internal fVRiEVdr, system ID: s_bd0e15512e96
+Resolving secrets
+00:00
+Preparing the "docker" executor
+00:08
+Using Docker executor with image registry.gitlab.com/gitlab-org/release-cli:latest ...
+Pulling docker image registry.gitlab.com/gitlab-org/release-cli:latest ...
+Using docker image sha256:6ea0637172e1885c14f641b98322014821b21a7d93ea0cbb22eeb5ba192be95b for registry.gitlab.com/gitlab-org/release-cli:latest with digest registry.gitlab.com/gitlab-org/release-cli@sha256:696013aea0f2a20482800ce3a77341f840d7c7ec17bd78bd555e0bd6c00e4f11 ...
+Preparing environment
+00:02
+Running on runner-fvrievdr-project-5045-concurrent-0 via ip-10-11-38-177.ec2.internal...
+Getting source from Git repository
+00:03
+Fetching changes with git depth set to 20...
+Reinitialized existing Git repository in /builds/Apurv.Jadhav/gitlab-cicd-crash-course/.git/
+Checking out bd1e5dff as detached HEAD (ref is 4.1.2)...
+Skipping Git submodules setup
+Downloading artifacts
+00:03
+Downloading artifacts for prepare_job (5618888)...
+Downloading artifacts from coordinator... ok        host=gitlab.connectwisedev.com id=5618888 responseStatus=200 OK token=_pFUY2qe
+Executing "step_script" stage of the job script
+00:02
+Using docker image sha256:6ea0637172e1885c14f641b98322014821b21a7d93ea0cbb22eeb5ba192be95b for registry.gitlab.com/gitlab-org/release-cli:latest with digest registry.gitlab.com/gitlab-org/release-cli@sha256:696013aea0f2a20482800ce3a77341f840d7c7ec17bd78bd555e0bd6c00e4f11 ...
+$ if command -v docker &> /dev/null; then # collapsed multi-line command
+$ echo "Creating release"
+Creating release
+Executing "step_release" stage of the job script
+00:01
+$ if command -v docker &> /dev/null; then # collapsed multi-line command
+$ release-cli create --name "Release 4.1.2" --description "release_notes.md" --tag-name "4.1.2" --ref "bd1e5dff343433399fb10ec99e9f5b9b289c51d2" --assets-link "{\"url\":\"https:///4-1-2:bd1e5dff343433399fb10ec99e9f5b9b289c51d2\",\"name\":\"Container Image 4.1.2\"}"
+time="2024-06-14T08:34:41Z" level=info msg="Creating Release..." catalog-publish=false cli=release-cli command=create name="Release 4.1.2" project-id=5045 ref=bd1e5dff343433399fb10ec99e9f5b9b289c51d2 server-url="https://gitlab.connectwisedev.com" tag-message= tag-name=4.1.2 version=0.18.0
+time="2024-06-14T08:34:41Z" level=fatal msg="run app" cli=release-cli error="failed to create release: API Error Response status_code: 409 message: Release already exists" version=0.18.0
+Cleaning up project directory and file based variables
+00:02
+ERROR: Job failed: exit code 1
