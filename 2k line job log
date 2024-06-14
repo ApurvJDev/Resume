@@ -1,0 +1,1972 @@
+Running with gitlab-runner 16.10.0 (81ab07f6)
+  on ip-10-11-78-176.ec2.internal zFmBvsmd, system ID: s_9b34e1758fb3
+Resolving secrets
+00:00
+Preparing the "docker" executor
+00:08
+Using Docker executor with image registry.gitlab.com/gitlab-org/release-cli:latest ...
+Pulling docker image registry.gitlab.com/gitlab-org/release-cli:latest ...
+Using docker image sha256:6ea0637172e1885c14f641b98322014821b21a7d93ea0cbb22eeb5ba192be95b for registry.gitlab.com/gitlab-org/release-cli:latest with digest registry.gitlab.com/gitlab-org/release-cli@sha256:696013aea0f2a20482800ce3a77341f840d7c7ec17bd78bd555e0bd6c00e4f11 ...
+Preparing environment
+00:03
+Running on runner-zfmbvsmd-project-5045-concurrent-0 via ip-10-11-78-176.ec2.internal...
+Getting source from Git repository
+00:03
+Fetching changes with git depth set to 20...
+Reinitialized existing Git repository in /builds/Apurv.Jadhav/gitlab-cicd-crash-course/.git/
+Checking out c03c977e as detached HEAD (ref is 4.1.5)...
+Removing release_notes.md
+Skipping Git submodules setup
+Downloading artifacts
+00:03
+Downloading artifacts for prepare_job (5619590)...
+Downloading artifacts from coordinator... ok        host=gitlab.connectwisedev.com id=5619590 responseStatus=200 OK token=kvyt9CBU
+Executing "step_script" stage of the job script
+00:04
+Using docker image sha256:6ea0637172e1885c14f641b98322014821b21a7d93ea0cbb22eeb5ba192be95b for registry.gitlab.com/gitlab-org/release-cli:latest with digest registry.gitlab.com/gitlab-org/release-cli@sha256:696013aea0f2a20482800ce3a77341f840d7c7ec17bd78bd555e0bd6c00e4f11 ...
+$ if command -v docker &> /dev/null; then # collapsed multi-line command
+$ apk add curl jq
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/main/x86_64/APKINDEX.tar.gz
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/community/x86_64/APKINDEX.tar.gz
+(1/9) Installing ca-certificates (20240226-r0)
+(2/9) Installing brotli-libs (1.0.9-r14)
+(3/9) Installing libunistring (1.1-r1)
+(4/9) Installing libidn2 (2.3.4-r1)
+(5/9) Installing nghttp2-libs (1.57.0-r0)
+(6/9) Installing libcurl (8.5.0-r0)
+(7/9) Installing curl (8.5.0-r0)
+(8/9) Installing oniguruma (6.9.8-r1)
+(9/9) Installing jq (1.6-r4)
+Executing busybox-1.36.1-r5.trigger
+Executing ca-certificates-20240226-r0.trigger
+OK: 13 MiB in 24 packages
+$ echo "Checking existing tags and releases"
+Checking existing tags and releases
+$ curl -H "PRIVATE-TOKEN: $CI_API_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/tags" | jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 17434    0 17434    0     0  47010      0 --:--:-- --:--:-- --:--:-- 47118
+[
+  {
+    "name": "4.1.5",
+    "message": "",
+    "target": "c03c977e227393c6c70b944ddae53b66ded3463a",
+    "commit": {
+      "id": "c03c977e227393c6c70b944ddae53b66ded3463a",
+      "short_id": "c03c977e",
+      "created_at": "2024-06-14T09:38:49.000+00:00",
+      "parent_ids": [
+        "38f22dd5ec70f62e931f98f9faae1c5a05528023"
+      ],
+      "title": "Added Feature 13",
+      "message": "Added Feature 13\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T09:38:49.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T09:38:49.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c03c977e227393c6c70b944ddae53b66ded3463a"
+    },
+    "release": {
+      "tag_name": "4.1.5",
+      "description": "Added Feature 13"
+    },
+    "protected": false
+  },
+  {
+    "name": "4.1.4",
+    "message": "Checking id release_job jives a detailed reason behind error 409",
+    "target": "a9410629bca67944255a5d918c16d4ab01ff2982",
+    "commit": {
+      "id": "c6ff5b906c82501cb822051ff8c5316a4b5f6966",
+      "short_id": "c6ff5b90",
+      "created_at": "2024-06-14T09:32:54.000+00:00",
+      "parent_ids": [
+        "3b9b5632f141c67d676ad852b1fddcef30467663"
+      ],
+      "title": "Feature 12",
+      "message": "Feature 12\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T09:32:54.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T09:32:54.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c6ff5b906c82501cb822051ff8c5316a4b5f6966"
+    },
+    "release": null,
+    "protected": false
+  },
+  {
+    "name": "4.1.3",
+    "message": "Changes done in release_jobs",
+    "target": "1528ae59881c2637f2e68d4b910486a4d1d99c05",
+    "commit": {
+      "id": "078cf52f17c0d9e46e4aacc92e1ead8d57e56443",
+      "short_id": "078cf52f",
+      "created_at": "2024-06-14T09:20:10.000+00:00",
+      "parent_ids": [
+        "aa2c9a4a00b4c10edc166709a52121d0d4e76ce9"
+      ],
+      "title": "Delete Feature 6",
+      "message": "Delete Feature 6\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T09:20:10.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T09:20:10.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/078cf52f17c0d9e46e4aacc92e1ead8d57e56443"
+    },
+    "release": {
+      "tag_name": "4.1.3",
+      "description": "Deleted Feature 6."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.1.2",
+    "message": "Checking if release_job works.",
+    "target": "bc877914de7028af66b3b88fa7c51791358dba20",
+    "commit": {
+      "id": "bd1e5dff343433399fb10ec99e9f5b9b289c51d2",
+      "short_id": "bd1e5dff",
+      "created_at": "2024-06-14T08:31:30.000+00:00",
+      "parent_ids": [
+        "01e659fdc555a207a96861bc26d58d4a6cec29b0"
+      ],
+      "title": "Add new file",
+      "message": "Add new file\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T08:31:30.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T08:31:30.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/bd1e5dff343433399fb10ec99e9f5b9b289c51d2"
+    },
+    "release": {
+      "tag_name": "4.1.2",
+      "description": "Feature 6 updated. Feature 11 added."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.1.1",
+    "message": "",
+    "target": "5755b7d532d791c4baca5ccff343689d1403c2c3",
+    "commit": {
+      "id": "5755b7d532d791c4baca5ccff343689d1403c2c3",
+      "short_id": "5755b7d5",
+      "created_at": "2024-06-14T06:42:30.000+00:00",
+      "parent_ids": [
+        "0644bbfa7d906426d9edb47a2c6f9042a1037af7"
+      ],
+      "title": "Feature 10 added.",
+      "message": "Feature 10 added.\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T06:42:30.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T06:42:30.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/5755b7d532d791c4baca5ccff343689d1403c2c3"
+    },
+    "release": {
+      "tag_name": "4.1.1",
+      "description": ""
+    },
+    "protected": false
+  },
+  {
+    "name": "4.1.0",
+    "message": "",
+    "target": "80afdf0d768813e7c2cee2279ac6d841ece54455",
+    "commit": {
+      "id": "80afdf0d768813e7c2cee2279ac6d841ece54455",
+      "short_id": "80afdf0d",
+      "created_at": "2024-06-14T05:52:05.000+00:00",
+      "parent_ids": [
+        "f183931a709b7491b2f29f8ec876c62b69ee0d34"
+      ],
+      "title": "Change in job name",
+      "message": "Change in job name",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T05:52:05.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T05:52:05.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/80afdf0d768813e7c2cee2279ac6d841ece54455"
+    },
+    "release": {
+      "tag_name": "4.1.0",
+      "description": "Deletion of feature6. Change in job name."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.9",
+    "message": "",
+    "target": "3a57806b91ae2aaf750a1d9d032e2d5fce67ec9f",
+    "commit": {
+      "id": "3a57806b91ae2aaf750a1d9d032e2d5fce67ec9f",
+      "short_id": "3a57806b",
+      "created_at": "2024-06-13T16:32:33.000+00:00",
+      "parent_ids": [
+        "0f03c65ffce91be2343efb33d346e7c2a2dbaec7"
+      ],
+      "title": "Delete Apurv",
+      "message": "Delete Apurv\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T16:32:33.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T16:32:33.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/3a57806b91ae2aaf750a1d9d032e2d5fce67ec9f"
+    },
+    "release": {
+      "tag_name": "4.0.9",
+      "description": "Feature added from other branch. Unused Feature deleted."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.8",
+    "message": "",
+    "target": "3275d7d1a92e415926bfbb5291d35e4092436d3a",
+    "commit": {
+      "id": "3275d7d1a92e415926bfbb5291d35e4092436d3a",
+      "short_id": "3275d7d1",
+      "created_at": "2024-06-13T08:51:08.000+00:00",
+      "parent_ids": [
+        "ee5f9d505c691ec6c9b3b7d7b5461180c8c955ac"
+      ],
+      "title": "Feature 9 added",
+      "message": "Feature 9 added\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T08:51:08.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T08:51:08.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/3275d7d1a92e415926bfbb5291d35e4092436d3a"
+    },
+    "release": {
+      "tag_name": "4.0.8",
+      "description": "Added Additional Features. Removed Unused Features."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.7",
+    "message": "",
+    "target": "9ebc8ad029791e8f540f950b64de7be1d9eb8145",
+    "commit": {
+      "id": "9ebc8ad029791e8f540f950b64de7be1d9eb8145",
+      "short_id": "9ebc8ad0",
+      "created_at": "2024-06-13T08:30:53.000+00:00",
+      "parent_ids": [
+        "7dcaed7b574053c87d901242b91795f0f2ee1f76"
+      ],
+      "title": "Delete Feature 4",
+      "message": "Delete Feature 4\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T08:30:53.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T08:30:53.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/9ebc8ad029791e8f540f950b64de7be1d9eb8145"
+    },
+    "release": {
+      "tag_name": "4.0.7",
+      "description": "Changes merged from other branch into main."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.6",
+    "message": "",
+    "target": "eb191b94ee4b0b0daa2ff26503222fe3a8ce0d14",
+    "commit": {
+      "id": "eb191b94ee4b0b0daa2ff26503222fe3a8ce0d14",
+      "short_id": "eb191b94",
+      "created_at": "2024-06-13T07:47:50.000+00:00",
+      "parent_ids": [
+        "656cf557a893824468b9a03c0cd8a20e650e0b9e"
+      ],
+      "title": "Feature 7",
+      "message": "Feature 7\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T07:47:50.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T07:47:50.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/eb191b94ee4b0b0daa2ff26503222fe3a8ce0d14"
+    },
+    "release": {
+      "tag_name": "4.0.6",
+      "description": "Multiple Contributions done"
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.5",
+    "message": "",
+    "target": "44a98567ec98d1af7b3d26cc5f45904063997848",
+    "commit": {
+      "id": "44a98567ec98d1af7b3d26cc5f45904063997848",
+      "short_id": "44a98567",
+      "created_at": "2024-06-13T06:09:46.000+00:00",
+      "parent_ids": [
+        "a82ab11bf067665b85b26011fd6ce8cd6067c3a3"
+      ],
+      "title": "Delete Feature Five",
+      "message": "Delete Feature Five\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T06:09:46.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T06:09:46.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/44a98567ec98d1af7b3d26cc5f45904063997848"
+    },
+    "release": {
+      "tag_name": "4.0.5",
+      "description": "Multiple Features added.\nUnused Features deleted"
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.4",
+    "message": "",
+    "target": "b657a5cea7971aad3a870f363c9dbacbebeeaad4",
+    "commit": {
+      "id": "b657a5cea7971aad3a870f363c9dbacbebeeaad4",
+      "short_id": "b657a5ce",
+      "created_at": "2024-06-12T07:38:18.000+00:00",
+      "parent_ids": [
+        "ce1f7b813b7fe031d26594d79a8c2224ad70ec7d"
+      ],
+      "title": "Delete Feature2",
+      "message": "Delete Feature2\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-12T07:38:18.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-12T07:38:18.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/b657a5cea7971aad3a870f363c9dbacbebeeaad4"
+    },
+    "release": {
+      "tag_name": "4.0.4",
+      "description": "Addition of Feature Five.\nRemoval of Feature Two."
+    },
+    "protected": false
+  },
+  {
+    "name": "v4.0.2",
+    "message": "Additional Feature added",
+    "target": "37623d4891d1e9baba6d4efcb84b59d8a2b563d5",
+    "commit": {
+      "id": "1a486175d60b6716f2103e2dfc29cbf24d943860",
+      "short_id": "1a486175",
+      "created_at": "2024-06-12T07:06:17.000+00:00",
+      "parent_ids": [
+        "433030a3e95bb6bb96bcc9112b288215e09dd754"
+      ],
+      "title": "Added Feature No. 4",
+      "message": "Added Feature No. 4\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-12T07:06:17.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-12T07:06:17.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/1a486175d60b6716f2103e2dfc29cbf24d943860"
+    },
+    "release": {
+      "tag_name": "v4.0.2",
+      "description": "Feature No. 4 Added.\r\nAdditional instruction added in release job script to make entries in changelog.md file."
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.3",
+    "message": "",
+    "target": "1a486175d60b6716f2103e2dfc29cbf24d943860",
+    "commit": {
+      "id": "1a486175d60b6716f2103e2dfc29cbf24d943860",
+      "short_id": "1a486175",
+      "created_at": "2024-06-12T07:06:17.000+00:00",
+      "parent_ids": [
+        "433030a3e95bb6bb96bcc9112b288215e09dd754"
+      ],
+      "title": "Added Feature No. 4",
+      "message": "Added Feature No. 4\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-12T07:06:17.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-12T07:06:17.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/1a486175d60b6716f2103e2dfc29cbf24d943860"
+    },
+    "release": {
+      "tag_name": "4.0.3",
+      "description": "Additional of new Features.\nRemoval of unused features"
+    },
+    "protected": false
+  },
+  {
+    "name": "4.0.0",
+    "message": "Third added feature",
+    "target": "7712df1251507bd45d9dd65355b6c6df97941b7d",
+    "commit": {
+      "id": "c6763e0e4d815fc409eb7d35856deb1f61113a3f",
+      "short_id": "c6763e0e",
+      "created_at": "2024-06-11T18:13:46.000+00:00",
+      "parent_ids": [
+        "7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7"
+      ],
+      "title": "Third added Feature",
+      "message": "Third added Feature\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T18:13:46.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T18:13:46.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c6763e0e4d815fc409eb7d35856deb1f61113a3f"
+    },
+    "release": {
+      "tag_name": "4.0.0",
+      "description": "Third new feature added.\r\nUnused feature removed."
+    },
+    "protected": false
+  },
+  {
+    "name": "v3.0.0",
+    "message": "Deletion of unused features",
+    "target": "676ec0be8f6eb70c169fe758f6650b9e7ed06350",
+    "commit": {
+      "id": "7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7",
+      "short_id": "7fc3f171",
+      "created_at": "2024-06-11T17:57:04.000+00:00",
+      "parent_ids": [
+        "ff2b72e19b3b9cc875109673d7a3101fee0182c6"
+      ],
+      "title": "Delete Feature1",
+      "message": "Delete Feature1\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:57:04.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:57:04.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7"
+    },
+    "release": {
+      "tag_name": "v3.0.0",
+      "description": "Unused features were deleted amongst 2 additional features in previous release.\r\nCheck if description is null"
+    },
+    "protected": false
+  },
+  {
+    "name": "v2.0.4",
+    "message": "2 added features",
+    "target": "3d343eb2870501c6276961efc5320cf80b93da16",
+    "commit": {
+      "id": "ff2b72e19b3b9cc875109673d7a3101fee0182c6",
+      "short_id": "ff2b72e1",
+      "created_at": "2024-06-11T17:54:04.000+00:00",
+      "parent_ids": [
+        "573dbcdac327a13a4cf8829af63f3a6deda6ba34"
+      ],
+      "title": "Two additional Features",
+      "message": "Two additional Features\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:54:04.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:54:04.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/ff2b72e19b3b9cc875109673d7a3101fee0182c6"
+    },
+    "release": {
+      "tag_name": "v2.0.4",
+      "description": "Two new additional Features added in this release.\r\nUnnecessary features to be deleted in further release.\r\nCheck if description is null"
+    },
+    "protected": false
+  },
+  {
+    "name": "v2.0.3",
+    "message": "Unused features deleted",
+    "target": "d5311bb31b15344cfa8216ce6451705c19cdbde2",
+    "commit": {
+      "id": "5438313dc36935846afd989fd72e86a13e5bb7e1",
+      "short_id": "5438313d",
+      "created_at": "2024-06-11T17:49:34.000+00:00",
+      "parent_ids": [
+        "c1c8021869d650f40c846304b986186773b8784e"
+      ],
+      "title": "Delete Sample",
+      "message": "Delete Sample\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:49:34.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:49:34.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/5438313dc36935846afd989fd72e86a13e5bb7e1"
+    },
+    "release": {
+      "tag_name": "v2.0.3",
+      "description": "Minor Patch fix done by removing unnecessary features.\r\nThis is also a was also done to check whether description still stays null."
+    },
+    "protected": false
+  },
+  {
+    "name": "v2.0.2",
+    "message": "",
+    "target": "c1c8021869d650f40c846304b986186773b8784e",
+    "commit": {
+      "id": "c1c8021869d650f40c846304b986186773b8784e",
+      "short_id": "c1c80218",
+      "created_at": "2024-06-11T17:37:54.000+00:00",
+      "parent_ids": [
+        "0c9650f262fef55cba33047d4f154229cb198ada"
+      ],
+      "title": "Feature added",
+      "message": "Feature added\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:37:54.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:37:54.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c1c8021869d650f40c846304b986186773b8784e"
+    },
+    "release": {
+      "tag_name": "v2.0.2",
+      "description": "null\n"
+    },
+    "protected": false
+  },
+  {
+    "name": "v2.0.1",
+    "message": "A feature was deleted",
+    "target": "9af2589d3d395b9e42961905bc5139661aec4f94",
+    "commit": {
+      "id": "ff80ced182e16d788ff9eded5ef40fdb02a71517",
+      "short_id": "ff80ced1",
+      "created_at": "2024-06-11T17:23:23.000+00:00",
+      "parent_ids": [
+        "f48b098dc4df567a980e08a8c75e089ba0782b79"
+      ],
+      "title": "Delete Newfile.txt",
+      "message": "Delete Newfile.txt\r\n\r\nChangelog:  removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:23:23.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:23:23.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/ff80ced182e16d788ff9eded5ef40fdb02a71517"
+    },
+    "release": null,
+    "protected": false
+  }
+]
+$ curl -H "PRIVATE-TOKEN: $CI_API_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases" | jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 46231    0 46231    0     0   141k      0 --:--:-- --:--:-- --:--:--  141k
+[
+  {
+    "name": "4.1.5",
+    "tag_name": "4.1.5",
+    "description": "Added Feature 13",
+    "created_at": "2024-06-14T09:39:23.923Z",
+    "released_at": "2024-06-14T09:39:23.923Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "c03c977e227393c6c70b944ddae53b66ded3463a",
+      "short_id": "c03c977e",
+      "created_at": "2024-06-14T09:38:49.000+00:00",
+      "parent_ids": [
+        "38f22dd5ec70f62e931f98f9faae1c5a05528023"
+      ],
+      "title": "Added Feature 13",
+      "message": "Added Feature 13\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T09:38:49.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T09:38:49.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c03c977e227393c6c70b944ddae53b66ded3463a"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c03c977e227393c6c70b944ddae53b66ded3463a",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.1.5",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.5/gitlab-cicd-crash-course-4.1.5.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.5/gitlab-cicd-crash-course-4.1.5.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.5/gitlab-cicd-crash-course-4.1.5.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.5/gitlab-cicd-crash-course-4.1.5.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "ce22933fee97b7f1d9b3ccfad432217a11fd0be2f78d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.5/evidences/1973.json",
+        "collected_at": "2024-06-14T09:39:24.018Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.5",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.5/edit"
+    }
+  },
+  {
+    "name": "4.1.3",
+    "tag_name": "4.1.3",
+    "description": "Deleted Feature 6.",
+    "created_at": "2024-06-14T09:21:01.008Z",
+    "released_at": "2024-06-14T09:21:01.008Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "078cf52f17c0d9e46e4aacc92e1ead8d57e56443",
+      "short_id": "078cf52f",
+      "created_at": "2024-06-14T09:20:10.000+00:00",
+      "parent_ids": [
+        "aa2c9a4a00b4c10edc166709a52121d0d4e76ce9"
+      ],
+      "title": "Delete Feature 6",
+      "message": "Delete Feature 6\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T09:20:10.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T09:20:10.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/078cf52f17c0d9e46e4aacc92e1ead8d57e56443"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/078cf52f17c0d9e46e4aacc92e1ead8d57e56443",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.1.3",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.3/gitlab-cicd-crash-course-4.1.3.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.3/gitlab-cicd-crash-course-4.1.3.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.3/gitlab-cicd-crash-course-4.1.3.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.3/gitlab-cicd-crash-course-4.1.3.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "b81c78d9c435201261020002ccee103b376af310ee0d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.3/evidences/1972.json",
+        "collected_at": "2024-06-14T09:21:01.328Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.3",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.3/edit"
+    }
+  },
+  {
+    "name": "4.1.2",
+    "tag_name": "4.1.2",
+    "description": "Feature 6 updated. Feature 11 added.",
+    "created_at": "2024-06-14T08:34:06.756Z",
+    "released_at": "2024-06-14T08:34:06.756Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "bd1e5dff343433399fb10ec99e9f5b9b289c51d2",
+      "short_id": "bd1e5dff",
+      "created_at": "2024-06-14T08:31:30.000+00:00",
+      "parent_ids": [
+        "01e659fdc555a207a96861bc26d58d4a6cec29b0"
+      ],
+      "title": "Add new file",
+      "message": "Add new file\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T08:31:30.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T08:31:30.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/bd1e5dff343433399fb10ec99e9f5b9b289c51d2"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/bd1e5dff343433399fb10ec99e9f5b9b289c51d2",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.1.2",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.2/gitlab-cicd-crash-course-4.1.2.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.2/gitlab-cicd-crash-course-4.1.2.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.2/gitlab-cicd-crash-course-4.1.2.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.2/gitlab-cicd-crash-course-4.1.2.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "b32fd349606b7f7cbb31e98f8c1522e000e507b09b4d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.2/evidences/1971.json",
+        "collected_at": "2024-06-14T08:34:06.826Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.2",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.2/edit"
+    }
+  },
+  {
+    "name": "4.1.1",
+    "tag_name": "4.1.1",
+    "description": "",
+    "created_at": "2024-06-14T06:43:23.420Z",
+    "released_at": "2024-06-14T06:43:02.890Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "5755b7d532d791c4baca5ccff343689d1403c2c3",
+      "short_id": "5755b7d5",
+      "created_at": "2024-06-14T06:42:30.000+00:00",
+      "parent_ids": [
+        "0644bbfa7d906426d9edb47a2c6f9042a1037af7"
+      ],
+      "title": "Feature 10 added.",
+      "message": "Feature 10 added.\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T06:42:30.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T06:42:30.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/5755b7d532d791c4baca5ccff343689d1403c2c3"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/5755b7d532d791c4baca5ccff343689d1403c2c3",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.1.1",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.1/gitlab-cicd-crash-course-4.1.1.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.1/gitlab-cicd-crash-course-4.1.1.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.1/gitlab-cicd-crash-course-4.1.1.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.1/gitlab-cicd-crash-course-4.1.1.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "18d91abbbbd5bfbeca3c0313fbbf92205ee1f2f20a0d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.1/evidences/1970.json",
+        "collected_at": "2024-06-14T07:00:13.545Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.1",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.1/edit"
+    }
+  },
+  {
+    "name": "Unused Feature deleted",
+    "tag_name": "4.1.0",
+    "description": "Deletion of feature6. Change in job name.",
+    "created_at": "2024-06-14T05:53:43.660Z",
+    "released_at": "2024-06-14T05:52:32.876Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "80afdf0d768813e7c2cee2279ac6d841ece54455",
+      "short_id": "80afdf0d",
+      "created_at": "2024-06-14T05:52:05.000+00:00",
+      "parent_ids": [
+        "f183931a709b7491b2f29f8ec876c62b69ee0d34"
+      ],
+      "title": "Change in job name",
+      "message": "Change in job name",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-14T05:52:05.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-14T05:52:05.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/80afdf0d768813e7c2cee2279ac6d841ece54455"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/80afdf0d768813e7c2cee2279ac6d841ece54455",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.1.0",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.0/gitlab-cicd-crash-course-4.1.0.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.0/gitlab-cicd-crash-course-4.1.0.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.0/gitlab-cicd-crash-course-4.1.0.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.1.0/gitlab-cicd-crash-course-4.1.0.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "572b1331d02828060203823a478adc50131829c4f4ed",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.0/evidences/1969.json",
+        "collected_at": "2024-06-14T06:00:15.024Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.0",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.1.0/edit"
+    }
+  },
+  {
+    "name": "4.0.9",
+    "tag_name": "4.0.9",
+    "description": "Feature added from other branch. Unused Feature deleted.",
+    "created_at": "2024-06-13T16:33:44.657Z",
+    "released_at": "2024-06-13T16:32:51.294Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "3a57806b91ae2aaf750a1d9d032e2d5fce67ec9f",
+      "short_id": "3a57806b",
+      "created_at": "2024-06-13T16:32:33.000+00:00",
+      "parent_ids": [
+        "0f03c65ffce91be2343efb33d346e7c2a2dbaec7"
+      ],
+      "title": "Delete Apurv",
+      "message": "Delete Apurv\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T16:32:33.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T16:32:33.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/3a57806b91ae2aaf750a1d9d032e2d5fce67ec9f"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/3a57806b91ae2aaf750a1d9d032e2d5fce67ec9f",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.9",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.9/gitlab-cicd-crash-course-4.0.9.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.9/gitlab-cicd-crash-course-4.0.9.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.9/gitlab-cicd-crash-course-4.0.9.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.9/gitlab-cicd-crash-course-4.0.9.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "10f742307ad2d977cbb1ca31ae09af12a3dec16e998d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.9/evidences/1963.json",
+        "collected_at": "2024-06-13T17:00:08.236Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.9",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.9/edit"
+    }
+  },
+  {
+    "name": "4.0.8",
+    "tag_name": "4.0.8",
+    "description": "Added Additional Features. Removed Unused Features.",
+    "created_at": "2024-06-13T08:52:32.763Z",
+    "released_at": "2024-06-13T08:51:49.345Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "3275d7d1a92e415926bfbb5291d35e4092436d3a",
+      "short_id": "3275d7d1",
+      "created_at": "2024-06-13T08:51:08.000+00:00",
+      "parent_ids": [
+        "ee5f9d505c691ec6c9b3b7d7b5461180c8c955ac"
+      ],
+      "title": "Feature 9 added",
+      "message": "Feature 9 added\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T08:51:08.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T08:51:08.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/3275d7d1a92e415926bfbb5291d35e4092436d3a"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/3275d7d1a92e415926bfbb5291d35e4092436d3a",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.8",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.8/gitlab-cicd-crash-course-4.0.8.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.8/gitlab-cicd-crash-course-4.0.8.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.8/gitlab-cicd-crash-course-4.0.8.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.8/gitlab-cicd-crash-course-4.0.8.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "23332096c2f94a4191e4fbe9536a82231c8bf10e384d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.8/evidences/1961.json",
+        "collected_at": "2024-06-13T09:00:43.805Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.8",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.8/edit"
+    }
+  },
+  {
+    "name": "Branch merge release",
+    "tag_name": "4.0.7",
+    "description": "Changes merged from other branch into main.",
+    "created_at": "2024-06-13T08:32:20.234Z",
+    "released_at": "2024-06-13T08:31:41.118Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "9ebc8ad029791e8f540f950b64de7be1d9eb8145",
+      "short_id": "9ebc8ad0",
+      "created_at": "2024-06-13T08:30:53.000+00:00",
+      "parent_ids": [
+        "7dcaed7b574053c87d901242b91795f0f2ee1f76"
+      ],
+      "title": "Delete Feature 4",
+      "message": "Delete Feature 4\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T08:30:53.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T08:30:53.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/9ebc8ad029791e8f540f950b64de7be1d9eb8145"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/9ebc8ad029791e8f540f950b64de7be1d9eb8145",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.7",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.7/gitlab-cicd-crash-course-4.0.7.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.7/gitlab-cicd-crash-course-4.0.7.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.7/gitlab-cicd-crash-course-4.0.7.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.7/gitlab-cicd-crash-course-4.0.7.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "f08007a0643a398f06a7d2fdaf862c774ede14a4060d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.7/evidences/1960.json",
+        "collected_at": "2024-06-13T09:00:43.241Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.7",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.7/edit"
+    }
+  },
+  {
+    "name": "4.0.6",
+    "tag_name": "4.0.6",
+    "description": "Multiple Contributions done",
+    "created_at": "2024-06-13T07:49:21.657Z",
+    "released_at": "2024-06-13T07:48:37.152Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "eb191b94ee4b0b0daa2ff26503222fe3a8ce0d14",
+      "short_id": "eb191b94",
+      "created_at": "2024-06-13T07:47:50.000+00:00",
+      "parent_ids": [
+        "656cf557a893824468b9a03c0cd8a20e650e0b9e"
+      ],
+      "title": "Feature 7",
+      "message": "Feature 7\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T07:47:50.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T07:47:50.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/eb191b94ee4b0b0daa2ff26503222fe3a8ce0d14"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/eb191b94ee4b0b0daa2ff26503222fe3a8ce0d14",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.6",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.6/gitlab-cicd-crash-course-4.0.6.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.6/gitlab-cicd-crash-course-4.0.6.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.6/gitlab-cicd-crash-course-4.0.6.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.6/gitlab-cicd-crash-course-4.0.6.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "23f2c3a6d0d0c121f91925f3453c6c2711f0c65cf16d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.6/evidences/1959.json",
+        "collected_at": "2024-06-13T08:00:17.567Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.6",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.6/edit"
+    }
+  },
+  {
+    "name": "Multiple contribution",
+    "tag_name": "4.0.5",
+    "description": "Multiple Features added.\nUnused Features deleted",
+    "created_at": "2024-06-13T06:10:59.899Z",
+    "released_at": "2024-06-13T06:10:02.614Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "44a98567ec98d1af7b3d26cc5f45904063997848",
+      "short_id": "44a98567",
+      "created_at": "2024-06-13T06:09:46.000+00:00",
+      "parent_ids": [
+        "a82ab11bf067665b85b26011fd6ce8cd6067c3a3"
+      ],
+      "title": "Delete Feature Five",
+      "message": "Delete Feature Five\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-13T06:09:46.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-13T06:09:46.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/44a98567ec98d1af7b3d26cc5f45904063997848"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/44a98567ec98d1af7b3d26cc5f45904063997848",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.5",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.5/gitlab-cicd-crash-course-4.0.5.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.5/gitlab-cicd-crash-course-4.0.5.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.5/gitlab-cicd-crash-course-4.0.5.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.5/gitlab-cicd-crash-course-4.0.5.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "cc05453746b4bf25f986febd0ba5afab2b01f33bffcd",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.5/evidences/1958.json",
+        "collected_at": "2024-06-13T07:00:32.160Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.5",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.5/edit"
+    }
+  },
+  {
+    "name": "4.0.4",
+    "tag_name": "4.0.4",
+    "description": "Addition of Feature Five.\nRemoval of Feature Two.",
+    "created_at": "2024-06-12T07:39:43.021Z",
+    "released_at": "2024-06-12T07:38:42.714Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "b657a5cea7971aad3a870f363c9dbacbebeeaad4",
+      "short_id": "b657a5ce",
+      "created_at": "2024-06-12T07:38:18.000+00:00",
+      "parent_ids": [
+        "ce1f7b813b7fe031d26594d79a8c2224ad70ec7d"
+      ],
+      "title": "Delete Feature2",
+      "message": "Delete Feature2\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-12T07:38:18.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-12T07:38:18.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/b657a5cea7971aad3a870f363c9dbacbebeeaad4"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/b657a5cea7971aad3a870f363c9dbacbebeeaad4",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.4",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.4/gitlab-cicd-crash-course-4.0.4.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.4/gitlab-cicd-crash-course-4.0.4.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.4/gitlab-cicd-crash-course-4.0.4.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.4/gitlab-cicd-crash-course-4.0.4.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "12b14503e23066b8d7e05331359df1910004f00ace8d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.4/evidences/1948.json",
+        "collected_at": "2024-06-12T08:00:08.921Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.4",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.4/edit"
+    }
+  },
+  {
+    "name": "Additional Features added",
+    "tag_name": "4.0.3",
+    "description": "Additional of new Features.\nRemoval of unused features",
+    "created_at": "2024-06-12T07:34:11.859Z",
+    "released_at": "2024-06-12T07:33:26.634Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "1a486175d60b6716f2103e2dfc29cbf24d943860",
+      "short_id": "1a486175",
+      "created_at": "2024-06-12T07:06:17.000+00:00",
+      "parent_ids": [
+        "433030a3e95bb6bb96bcc9112b288215e09dd754"
+      ],
+      "title": "Added Feature No. 4",
+      "message": "Added Feature No. 4\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-12T07:06:17.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-12T07:06:17.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/1a486175d60b6716f2103e2dfc29cbf24d943860"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/1a486175d60b6716f2103e2dfc29cbf24d943860",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.3",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.3/gitlab-cicd-crash-course-4.0.3.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.3/gitlab-cicd-crash-course-4.0.3.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.3/gitlab-cicd-crash-course-4.0.3.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.3/gitlab-cicd-crash-course-4.0.3.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "301a529d50479381a2de585ebc2e1ca17c4c782ecdad",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.3/evidences/1949.json",
+        "collected_at": "2024-06-12T08:00:09.034Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.3",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.3/edit"
+    }
+  },
+  {
+    "name": "v4.0.2",
+    "tag_name": "v4.0.2",
+    "description": "Feature No. 4 Added.\r\nAdditional instruction added in release job script to make entries in changelog.md file.",
+    "created_at": "2024-06-12T07:07:31.345Z",
+    "released_at": "2024-06-12T07:07:31.345Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "1a486175d60b6716f2103e2dfc29cbf24d943860",
+      "short_id": "1a486175",
+      "created_at": "2024-06-12T07:06:17.000+00:00",
+      "parent_ids": [
+        "433030a3e95bb6bb96bcc9112b288215e09dd754"
+      ],
+      "title": "Added Feature No. 4",
+      "message": "Added Feature No. 4\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-12T07:06:17.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-12T07:06:17.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/1a486175d60b6716f2103e2dfc29cbf24d943860"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/1a486175d60b6716f2103e2dfc29cbf24d943860",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/v4.0.2",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v4.0.2/gitlab-cicd-crash-course-v4.0.2.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v4.0.2/gitlab-cicd-crash-course-v4.0.2.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v4.0.2/gitlab-cicd-crash-course-v4.0.2.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v4.0.2/gitlab-cicd-crash-course-v4.0.2.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "6b28f00b1d2279a4ab4fae2675bec49fe84b23fcf6ad",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v4.0.2/evidences/1947.json",
+        "collected_at": "2024-06-12T07:07:31.459Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v4.0.2",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v4.0.2/edit"
+    }
+  },
+  {
+    "name": "4.0.0",
+    "tag_name": "4.0.0",
+    "description": "Third new feature added.\r\nUnused feature removed.",
+    "created_at": "2024-06-11T18:14:34.651Z",
+    "released_at": "2024-06-11T18:14:34.651Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "c6763e0e4d815fc409eb7d35856deb1f61113a3f",
+      "short_id": "c6763e0e",
+      "created_at": "2024-06-11T18:13:46.000+00:00",
+      "parent_ids": [
+        "7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7"
+      ],
+      "title": "Third added Feature",
+      "message": "Third added Feature\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T18:13:46.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T18:13:46.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c6763e0e4d815fc409eb7d35856deb1f61113a3f"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c6763e0e4d815fc409eb7d35856deb1f61113a3f",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/4.0.0",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.0/gitlab-cicd-crash-course-4.0.0.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.0/gitlab-cicd-crash-course-4.0.0.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.0/gitlab-cicd-crash-course-4.0.0.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/4.0.0/gitlab-cicd-crash-course-4.0.0.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "439c23a931fdd631190091a2f140eebca98135b3030d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.0/evidences/1945.json",
+        "collected_at": "2024-06-11T18:14:34.721Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.0",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/4.0.0/edit"
+    }
+  },
+  {
+    "name": "v3.0.0",
+    "tag_name": "v3.0.0",
+    "description": "Unused features were deleted amongst 2 additional features in previous release.\r\nCheck if description is null",
+    "created_at": "2024-06-11T17:58:09.185Z",
+    "released_at": "2024-06-11T17:58:09.185Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7",
+      "short_id": "7fc3f171",
+      "created_at": "2024-06-11T17:57:04.000+00:00",
+      "parent_ids": [
+        "ff2b72e19b3b9cc875109673d7a3101fee0182c6"
+      ],
+      "title": "Delete Feature1",
+      "message": "Delete Feature1\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:57:04.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:57:04.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/7fc3f1710e01b8b7f5bf298ec7bfc02fcd92d9e7",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/v3.0.0",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v3.0.0/gitlab-cicd-crash-course-v3.0.0.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v3.0.0/gitlab-cicd-crash-course-v3.0.0.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v3.0.0/gitlab-cicd-crash-course-v3.0.0.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v3.0.0/gitlab-cicd-crash-course-v3.0.0.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "0f36ee01c121b3cede227ba0fa3e4513a042f6b92fad",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v3.0.0/evidences/1944.json",
+        "collected_at": "2024-06-11T17:58:09.880Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v3.0.0",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v3.0.0/edit"
+    }
+  },
+  {
+    "name": "v2.0.4",
+    "tag_name": "v2.0.4",
+    "description": "Two new additional Features added in this release.\r\nUnnecessary features to be deleted in further release.\r\nCheck if description is null",
+    "created_at": "2024-06-11T17:55:14.769Z",
+    "released_at": "2024-06-11T17:55:14.769Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "ff2b72e19b3b9cc875109673d7a3101fee0182c6",
+      "short_id": "ff2b72e1",
+      "created_at": "2024-06-11T17:54:04.000+00:00",
+      "parent_ids": [
+        "573dbcdac327a13a4cf8829af63f3a6deda6ba34"
+      ],
+      "title": "Two additional Features",
+      "message": "Two additional Features\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:54:04.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:54:04.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/ff2b72e19b3b9cc875109673d7a3101fee0182c6"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/ff2b72e19b3b9cc875109673d7a3101fee0182c6",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/v2.0.4",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.4/gitlab-cicd-crash-course-v2.0.4.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.4/gitlab-cicd-crash-course-v2.0.4.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.4/gitlab-cicd-crash-course-v2.0.4.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.4/gitlab-cicd-crash-course-v2.0.4.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "7cead62623ace8f0f5746bb65fae47f022cd63d0a30d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.4/evidences/1943.json",
+        "collected_at": "2024-06-11T17:55:14.841Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.4",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.4/edit"
+    }
+  },
+  {
+    "name": "v2.0.3",
+    "tag_name": "v2.0.3",
+    "description": "Minor Patch fix done by removing unnecessary features.\r\nThis is also a was also done to check whether description still stays null.",
+    "created_at": "2024-06-11T17:51:38.857Z",
+    "released_at": "2024-06-11T17:51:38.857Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "5438313dc36935846afd989fd72e86a13e5bb7e1",
+      "short_id": "5438313d",
+      "created_at": "2024-06-11T17:49:34.000+00:00",
+      "parent_ids": [
+        "c1c8021869d650f40c846304b986186773b8784e"
+      ],
+      "title": "Delete Sample",
+      "message": "Delete Sample\r\n\r\nChangelog: removed",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:49:34.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:49:34.000+00:00",
+      "trailers": {
+        "Changelog": "removed"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/5438313dc36935846afd989fd72e86a13e5bb7e1"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/5438313dc36935846afd989fd72e86a13e5bb7e1",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/v2.0.3",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.3/gitlab-cicd-crash-course-v2.0.3.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.3/gitlab-cicd-crash-course-v2.0.3.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.3/gitlab-cicd-crash-course-v2.0.3.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.3/gitlab-cicd-crash-course-v2.0.3.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "23582e226aeebad4995b029113044dcb0f1e0f02910d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.3/evidences/1942.json",
+        "collected_at": "2024-06-11T17:51:40.592Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.3",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.3/edit"
+    }
+  },
+  {
+    "name": "Release v2.0.2",
+    "tag_name": "v2.0.2",
+    "description": "null\n",
+    "created_at": "2024-06-11T17:38:40.381Z",
+    "released_at": "2024-06-11T17:38:40.381Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "c1c8021869d650f40c846304b986186773b8784e",
+      "short_id": "c1c80218",
+      "created_at": "2024-06-11T17:37:54.000+00:00",
+      "parent_ids": [
+        "0c9650f262fef55cba33047d4f154229cb198ada"
+      ],
+      "title": "Feature added",
+      "message": "Feature added\r\n\r\nChangelog: added",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T17:37:54.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T17:37:54.000+00:00",
+      "trailers": {
+        "Changelog": "added"
+      },
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c1c8021869d650f40c846304b986186773b8784e"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/c1c8021869d650f40c846304b986186773b8784e",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/v2.0.2",
+    "assets": {
+      "count": 5,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.2/gitlab-cicd-crash-course-v2.0.2.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.2/gitlab-cicd-crash-course-v2.0.2.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.2/gitlab-cicd-crash-course-v2.0.2.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/v2.0.2/gitlab-cicd-crash-course-v2.0.2.tar"
+        }
+      ],
+      "links": [
+        {
+          "id": 861,
+          "name": "Container Image v2.0.2",
+          "url": "https:///v2-0-2:c1c8021869d650f40c846304b986186773b8784e",
+          "direct_asset_url": "https:///v2-0-2:c1c8021869d650f40c846304b986186773b8784e",
+          "external": true,
+          "link_type": "other"
+        }
+      ]
+    },
+    "evidences": [
+      {
+        "sha": "fc14d3a1f016bfeb17408aa0c0b3b6371d5e2c587b8d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.2/evidences/1941.json",
+        "collected_at": "2024-06-11T17:38:40.467Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.2",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/v2.0.2/edit"
+    }
+  },
+  {
+    "name": "1.0.0",
+    "tag_name": "1.0.0",
+    "description": "Version 1.0.0 ",
+    "created_at": "2024-06-11T09:28:13.759Z",
+    "released_at": "2024-06-11T09:28:13.759Z",
+    "upcoming_release": false,
+    "author": {
+      "id": 3123,
+      "username": "Apurv.Jadhav",
+      "name": "Apurv Jadhav",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/ba1bd54d5731b7680a3eb54ccba79f3e?s=80&d=identicon",
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav"
+    },
+    "commit": {
+      "id": "a182b49eeda66355e0632e0fa6c2aef92e3081ca",
+      "short_id": "a182b49e",
+      "created_at": "2024-06-11T09:27:22.000+00:00",
+      "parent_ids": [
+        "567b84256fc3632daaf2c7942cfae1c8fc2a1ff3"
+      ],
+      "title": "New Feature added for Version 2.0.0",
+      "message": "New Feature added for Version 2.0.0",
+      "author_name": "Apurv Jadhav",
+      "author_email": "apurv.jadhav@connectwise.com",
+      "authored_date": "2024-06-11T09:27:22.000+00:00",
+      "committer_name": "Apurv Jadhav",
+      "committer_email": "apurv.jadhav@connectwise.com",
+      "committed_date": "2024-06-11T09:27:22.000+00:00",
+      "trailers": {},
+      "web_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/a182b49eeda66355e0632e0fa6c2aef92e3081ca"
+    },
+    "commit_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/commit/a182b49eeda66355e0632e0fa6c2aef92e3081ca",
+    "tag_path": "/Apurv.Jadhav/gitlab-cicd-crash-course/-/tags/1.0.0",
+    "assets": {
+      "count": 4,
+      "sources": [
+        {
+          "format": "zip",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/1.0.0/gitlab-cicd-crash-course-1.0.0.zip"
+        },
+        {
+          "format": "tar.gz",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/1.0.0/gitlab-cicd-crash-course-1.0.0.tar.gz"
+        },
+        {
+          "format": "tar.bz2",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/1.0.0/gitlab-cicd-crash-course-1.0.0.tar.bz2"
+        },
+        {
+          "format": "tar",
+          "url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/archive/1.0.0/gitlab-cicd-crash-course-1.0.0.tar"
+        }
+      ],
+      "links": []
+    },
+    "evidences": [
+      {
+        "sha": "f60bd383fb1c3ce446de04623c3b056c6bbd43110b0d",
+        "filepath": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/1.0.0/evidences/1940.json",
+        "collected_at": "2024-06-11T09:28:13.841Z"
+      }
+    ],
+    "_links": {
+      "self": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/1.0.0",
+      "edit_url": "https://gitlab.connectwisedev.com/Apurv.Jadhav/gitlab-cicd-crash-course/-/releases/1.0.0/edit"
+    }
+  }
+]
+$ echo "Creating release"
+Creating release
+$ release-cli create \ # collapsed multi-line command
+time="2024-06-14T09:40:12Z" level=info msg="Creating Release..." catalog-publish=false cli=release-cli command=create name="Release 4.1.5" project-id=5045 ref=c03c977e227393c6c70b944ddae53b66ded3463a server-url="https://gitlab.connectwisedev.com" tag-message= tag-name=4.1.5 version=0.18.0
+time="2024-06-14T09:40:12Z" level=fatal msg="run app" cli=release-cli error="failed to create release: API Error Response status_code: 409 message: Release already exists" version=0.18.0
+Cleaning up project directory and file based variables
+00:03
+ERROR: Job failed: exit code 1
