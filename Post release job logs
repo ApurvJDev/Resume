@@ -1,0 +1,36 @@
+Running with gitlab-runner 16.10.0 (81ab07f6)
+  on ip-10-11-60-192.ec2.internal pKr4zduF, system ID: s_cf69b82a6c1c
+Resolving secrets
+00:00
+Preparing the "docker" executor
+00:04
+Using Docker executor with image alpine:latest ...
+Authenticating with credentials from /root/.docker/config.json
+Pulling docker image alpine:latest ...
+Using docker image sha256:1d34ffeaf190be23d3de5a8de0a436676b758f48f835c3a2d4768b798c15a7f1 for alpine:latest with digest alpine@sha256:77726ef6b57ddf65bb551896826ec38bc3e53f75cdde31354fbffb4f25238ebd ...
+Preparing environment
+00:00
+Running on runner-pkr4zduf-project-5045-concurrent-0 via ip-10-11-60-192.ec2.internal...
+Getting source from Git repository
+00:02
+Fetching changes with git depth set to 20...
+Reinitialized existing Git repository in /builds/Apurv.Jadhav/gitlab-cicd-crash-course/.git/
+Checking out 653495e7 as detached HEAD (ref is 4.2.2)...
+Skipping Git submodules setup
+Downloading artifacts
+00:01
+Downloading artifacts for prepare_job (5627403)...
+Downloading artifacts from coordinator... ok        host=gitlab.connectwisedev.com id=5627403 responseStatus=200 OK token=ta3R2w12
+Executing "step_script" stage of the job script
+00:01
+Using docker image sha256:1d34ffeaf190be23d3de5a8de0a436676b758f48f835c3a2d4768b798c15a7f1 for alpine:latest with digest alpine@sha256:77726ef6b57ddf65bb551896826ec38bc3e53f75cdde31354fbffb4f25238ebd ...
+$ if command -v docker &> /dev/null; then # collapsed multi-line command
+$ echo "Post release job running"
+Post release job running
+$ cat release_notes.md
+## 4.2.2 (2024-06-15)
+### added (1 change)
+- [Feature 19 addition](Apurv.Jadhav/gitlab-cicd-crash-course@653495e7b56550c500cf8e7219020239503abb68)
+Cleaning up project directory and file based variables
+00:00
+Job succeeded
