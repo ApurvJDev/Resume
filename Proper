@@ -1,0 +1,10 @@
+## 4.3.0 (2024-06-17)
+
+### removed (1 change)
+
+- [Delete Feature 16](Apurv.Jadhav/gitlab-cicd-crash-course@f5c63402e57556f347690cf3c4d1ea028c2a1397)
+
+### modified (1 change)
+
+- [adding description editing command within prepare_job](Apurv.Jadhav/gitlab-cicd-crash-course@60b2663ceb406e1d8676ec023848b28f1a48b608)
+
