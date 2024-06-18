@@ -1,0 +1,68 @@
+.job-release-build:
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        if [[ "$STACK_VERSION_FILE" == "pyproject.toml" || "$STACK_VERSION_FILE" == "setup.cfg" || "$STACK_VERSION_FILE" == "setup.cfg" || "$STACK_VERSION_FILE" == *"__init__.py"* ]]; then
+          # default to patch for python
+          export JOB_BUMP_TYPE="patch"
+        else
+          # default to minor for everything else
+          export JOB_BUMP_TYPE="minor"
+        fi
+      elif [ "$CI_COMMIT_BRANCH" = "release-*" ]; then
+        export JOB_BUMP_TYPE="patch"
+      else
+        export JOB_BUMP_TYPE="none"
+      fi
+    - export JOB_RELEASE_TAG=v$STACK_VERSION_RELEASE
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- tag commit with version -----------------------------------------"
+    - >-
+      statusCode=$(curl -o /tmp/tagresult -w '%{http_code}\n' --request POST --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/tags?tag_name=$JOB_RELEASE_TAG&ref=$CI_COMMIT_SHA")
+
+      if [[ $statusCode != 201 ]]; then
+        echo "tag commit failed: $(cat /tmp/tagresult)"
+        exit 1
+      fi
+
+    - "# --- add bump versioning ---------------------------------------------"
+    - |
+
+
+      if [[ "$JOB_BUMP_TYPE" == "none" ]]; then
+        echo "no automated version bump for this branch"
+      else
+        export JOB_COMMIT_ID=$(git rev-parse HEAD)
+        export JOB_VERSION_RELEASE_BUMPED=$(semver bump $JOB_BUMP_TYPE $STACK_VERSION_RELEASE)
+        if [ "$STACK_VERSION_FILE" == ".version" ]; then
+          content="$JOB_VERSION_RELEASE_BUMPED"
+        else
+          if [[ "$STACK_VERSION_FILE" == *"__init__.py"* ]]; then
+            sedCmd="s/__version__.*=.*/__version__ = '$JOB_VERSION_RELEASE_BUMPED'/g"
+          elif [ "$STACK_VERSION_FILE" == "setup.py" ]; then
+            sedCmd="s/version.*=.*,/version='$JOB_VERSION_RELEASE_BUMPED',/g"
+          elif [ "$STACK_VERSION_FILE" == "setup.cfg" ]; then
+            sedCmd="s/version.*=.*/version = $JOB_VERSION_RELEASE_BUMPED/g"
+          else
+            sedCmd="s/version.*=.*/version = \"$JOB_VERSION_RELEASE_BUMPED\"/g"
+          fi
+          sed -i -E "$sedCmd" "$STACK_VERSION_FILE"
+          content=$(cat "$STACK_VERSION_FILE")
+        fi
+
+        printenv | grep -E "^(JOB_)" | sort
+        curl --request POST --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" \
+        --form "branch=$CI_COMMIT_BRANCH" \
+        --form "commit_message=automated version bump" \
+        --form "actions[][action]=update" \
+        --form "actions[][file_path]=$STACK_VERSION_FILE" \
+        --form "actions[][content]=$content" \
+        "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits"
+      fi
+    - ""
