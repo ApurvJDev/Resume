@@ -1,0 +1,1930 @@
+# ================================================================== config ===
+
+default:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default:v1
+
+variables:
+  ACCOUNT_CLDMNGMT_STACK_NAME: pf-cloudmanagement-v1
+  CICD_TEST_EXCLUDE_PATHS: devops, spec, test, Test, **/tests, **/Tests, tmp
+  CICD_TEST_TARGET_DIR: ""
+  CICD_VAR_PATTERN: ^(ACCOUNT_|REGION_|BILLING_|CORE_|STACK_|DATA_|JOB_|APP_|MAIN_)
+  GITLAB_IMAGES_BASE_ECR_REPO: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-gitlab
+  GITLAB_IMAGE_CONTAINERSCAN_TAG: v1-containerscan
+  GITLAB_IMAGE_CODEQUALITY_TAG: v1-codequality
+  GITLAB_IMAGE_ANALYZERDAST_TAG: v1-analyzerdast
+  GITLAB_IMAGE_ANALYZERSCA_TAG: v1-analyzersca
+  GITLAB_IMAGE_ANALYZERSCANODEJS_TAG: v1-analyzerscanodejs
+  GITLAB_IMAGE_ANALYZERSCAPYTHON_TAG: v1-analyzerscapython
+  GITLAB_IMAGE_ANALYZERLICENSE_TAG: v1-analyzerlicense
+  GITLAB_IMAGE_ANALYZERSASTGO_TAG: v1-analyzersastgo
+  GITLAB_IMAGE_ANALYZERSASTDOTNET_TAG: v1-analyzersastdotnet
+  GITLAB_IMAGE_ANALYZERSASTNODEJS_TAG: v1-analyzersastnodejs
+  GITLAB_IMAGE_ANALYZERSASTPYTHON_TAG: v1-analyzersastpython
+  GITLAB_IMAGE_ANALYZERSECRETS_TAG: v1-analyzersecrets
+  SECURE_LOG_LEVEL: trace
+  STACK_SERVICE_NAME: "null"
+
+# ================================================================ snippets ===
+
+.snippets:
+  .print-ci-vars: &snippet_print_ci_vars
+    - "# --- print ci variables ----------------------------------------------"
+    - printenv | grep -E "^(CI_|CICD_|GITLAB_)" | sort
+    - ""
+  .set-aws-config: &snippet_set_aws_config
+    - "#--- print deployer user info -----------------------------------------"
+    - |
+      if [[ ! -z "${AWS_TARGET_ACCOUNT_AND_REGION}" ]]; then
+        export AWS_TARGET_ACCOUNT=$(echo "${AWS_TARGET_ACCOUNT_AND_REGION}" | sed -E "s/^([^-]+)-([^-]+)$/\1/g")
+        export AWS_TARGET_REGION=$(echo "${AWS_TARGET_ACCOUNT_AND_REGION}" | sed -E "s/^([^-]+)-([^-]+)$/\2/g")
+      fi
+    - |
+      if [[ ! -z "${AWS_TARGET_ACCOUNT}" ]]; then
+        export AWS_ACCESS_KEY_ID=$(printenv | grep -i "${AWS_TARGET_ACCOUNT}_" | grep "AWS_ACCESS_KEY_ID" | sed -E "s/^[^=]+=(.+)$/\1/g")
+        export AWS_SECRET_ACCESS_KEY=$(printenv | grep -i "${AWS_TARGET_ACCOUNT}_" | grep "AWS_SECRET_ACCESS_KEY" | sed -E "s/^[^=]+=(.+)$/\1/g")
+      fi
+    - |
+      if [[ -z "${AWS_ACCESS_KEY_ID}" || -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+        echo "aws access keys or target account must be set" && exit 1
+      fi
+    - |
+      if [[ ! -z "${AWS_TARGET_REGION}" ]]; then
+          case ${AWS_TARGET_REGION} in
+            use1)
+            export AWS_DEFAULT_REGION=us-east-1
+            ;;
+            use2)
+            export AWS_DEFAULT_REGION=us-east-2
+            ;;
+            usw2)
+            export AWS_DEFAULT_REGION=us-west-2
+            ;;
+            afs1)
+            export AWS_DEFAULT_REGION=af-south-1
+            ;;
+            aps1)
+            export AWS_DEFAULT_REGION=ap-south-1
+            ;;
+            apse2)
+            export AWS_DEFAULT_REGION=ap-southeast-2
+            ;;
+            euw1)
+            export AWS_DEFAULT_REGION=eu-west-1
+            ;;
+            euc1)
+            export AWS_DEFAULT_REGION=eu-central-1
+            ;;
+            *)
+            echo "unknown aws target region: ${AWS_TARGET_REGION}" && exit 1
+            ;;
+          esac
+      fi
+    - |
+      if [[ ! -z "${AWS_DEFAULT_REGION}" ]]; then
+          case ${AWS_DEFAULT_REGION} in
+            us-east-1)
+            export BILLING_TAG_TERRITORY=connectwise_us
+            ;;
+            us-east-2)
+            export BILLING_TAG_TERRITORY=connectwise_us
+            ;;
+            af-south-1)
+            export BILLING_TAG_TERRITORY=connectwise_af
+            ;;
+            ap-south-1)
+            export BILLING_TAG_TERRITORY=connectwise_in
+            ;;
+            ap-southeast-2)
+            export BILLING_TAG_TERRITORY=connectwise_au
+            ;;
+            eu-west-1)
+            export BILLING_TAG_TERRITORY=connectwise_uk
+            ;;
+            *)
+            echo "unknown aws region: ${AWS_DEFAULT_REGION}" && exit 1
+            ;;
+          esac
+      fi
+    - |
+      if [[ -z "${AWS_DEFAULT_REGION}" ]]; then
+        echo "aws region or target region must be set" && exit 1
+      fi
+    - aws sts get-caller-identity
+    - |
+      if [[ ! -z "${AWS_TARGET_ACCOUNT}" ]]; then
+          case ${AWS_TARGET_ACCOUNT} in
+            cwcoreentity* | cwiam*)
+              export BILLING_TAG_BUSINESS_UNIT=cw_saas
+              export BILLING_TAG_DEPARTMENT=development
+              ;;
+            cwautomate*)
+              export BILLING_TAG_BUSINESS_UNIT=cw_automate
+              export BILLING_TAG_DEPARTMENT=development
+              ;;
+            cwbrightgauge*)
+              export BILLING_TAG_BUSINESS_UNIT=cw_brightgauge
+              export BILLING_TAG_DEPARTMENT=development
+              ;;
+            cwsmileback*)
+              export BILLING_TAG_BUSINESS_UNIT=cw_smileback
+              export BILLING_TAG_DEPARTMENT=development
+              ;;
+            cwitboost*)
+              export BILLING_TAG_BUSINESS_UNIT=cw_itboost
+              export BILLING_TAG_DEPARTMENT=development
+              ;;
+            cwrmm*)
+              export BILLING_TAG_BUSINESS_UNIT=cw_continuum
+              export BILLING_TAG_DEPARTMENT=development
+              ;;
+            *)
+              export BILLING_TAG_BUSINESS_UNIT=${BILLING_TAG_BUSINESS_UNIT:-corporate}
+              export BILLING_TAG_DEPARTMENT=${BILLING_TAG_DEPARTMENT:-platform}
+              ;;
+          esac
+      fi
+    - export ORIGINAL_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    - export ORIGINAL_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - ""
+  .print-deployer-info: &snippet_print_deployer_info
+    - "#--- print deployer user info -----------------------------------------"
+    - aws sts get-caller-identity || true
+    - ""
+  .set-shared-vars: &snippet_set_shared_vars
+    - "# --- determine build version ------------------------------------------"
+    - |
+      set +e  # don't exit on error while trying to set version
+      versionFile=""
+      projectVersion=""
+      for vf in ".version" "pyproject.toml" "setup.py" "setup.cfg"; do
+        if [[ -f "$vf" ]]; then
+          if [ "$vf" == ".version" ]; then
+            projectVersion=$(head -1 $vf | xargs)
+          else
+            projectVersion=$(grep -s 'version' "$vf" | cut -d'"' -f2)
+          fi
+          versionFile=$vf
+          break
+        fi
+      done
+
+      if [[ -z "$versionFile" || -z "$projectVersion" ]]; then
+        # check in __init__.py as a last resort
+        versionFile=$(grep -srl "__version__" src/**/__init__.py | head -1)
+        projectVersion=$(grep -srni "__version__" "$versionFile" | cut -d'"' -f2)
+        [[ -z "$versionFile" || -z "$projectVersion" ]] && echo "Could not locate version file for project"
+      fi
+      echo "VERSION FILE: $versionFile"
+      echo "PROJECT VERSION: $projectVersion"
+
+      export STACK_VERSION_FILE="$versionFile"
+      export STACK_VERSION_RELEASE="$projectVersion"
+      export STACK_VERSION_BUILD=$(semver bump build $CI_PIPELINE_IID $STACK_VERSION_RELEASE)
+      set -e  # turn errors back on
+    - ""
+    - "# --- define shared variables -----------------------------------------"
+    - export ACCOUNT_LEVEL=$(aws ssm get-parameter --name /$ACCOUNT_CLDMNGMT_STACK_NAME/meta/account/level --query 'Parameter.Value' --output text)
+    - export ACCOUNT_TYPE=$(aws ssm get-parameter --name /$ACCOUNT_CLDMNGMT_STACK_NAME/meta/account/type --query 'Parameter.Value' --output text)
+    - export CORE_STACK_NAME=$STACK_SERVICE_NAME-core
+    - export CORE_STACK_ARTIFACT_S3_BUCKET=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text)
+    - export STACK_TARGETED_ENV_NAME=$(echo "$CI_ENVIRONMENT_NAME" | sed "s/stg-/prd-/")
+    - export STACK_TARGETED_ENV_NS=$(echo "$STACK_TARGETED_ENV_NAME" | sed "s/-//g" | sed "s/\///g" )
+    - ""
+  .ms-teams-notifications: &snippet_ms_teams_notifications
+    - "# --- send deployment notifications to ms teams -----------------------"
+    - |
+      set +e  # don't exit on error if curl request fails
+      if [[ ${CI_JOB_STAGE} == "prd" ]];then
+        if [[ -v MS_TEAMS_WEBHOOK_URL ]] && [[ ! -z "${MS_TEAMS_WEBHOOK_URL}" ]]; then
+            export cardTitle=$CI_PROJECT_TITLE" - Pipeline ${CI_JOB_STATUS}"
+            export statusMsg="Pipeline Execution - ${CI_JOB_STATUS}"
+            export cardMsg=$( jq -n --arg title "$cardTitle" \
+            --arg en "$CI_ENVIRONMENT_NAME" \
+            --arg pt "$CI_PROJECT_TITLE" \
+            --arg ps "$CI_PIPELINE_SOURCE" \
+            --arg cm "$CI_COMMIT_MESSAGE" \
+            --arg cb "${CI_COMMIT_BRANCH:-NA}" \
+            --arg ct "${CI_COMMIT_TAG:-NA}" \
+            --arg cs "$CI_COMMIT_SHA" \
+            --arg pi "$CI_PIPELINE_ID" \
+            --arg ca "$CI_COMMIT_AUTHOR" \
+            --arg url "$CI_PIPELINE_URL" \
+            --arg status "$statusMsg" \
+            '{"type":"message","attachments":[{"contentType":"application/vnd.microsoft.card.adaptive","contentUrl":null,"content":{"type":"AdaptiveCard","version":"1.3","$schema":"http://adaptivecards.io/schemas/adaptive-card.json","msTeams":{"width":"full"},"body":[{"type":"TextBlock","size":"Large","weight":"Bolder","text":$title},{"type":"TextBlock","size":"Medium","text":$status},{"type":"FactSet","facts":[{"title":"Deployed Env:","value":$en},{"title":"Repository Name:","value":$pt},{"title":"Pipeline Source:","value":$ps},{"title":"Commit Message:","value":$cm},{"title":"Commit Branch:","value":$cb},{"title":"Commit Tag:","value":$ct},{"title":"Commit SHA:","value":$cs},{"title":"Pipeline Id:","value":$pi},{"title":"Commit Author:","value":$ca}]}],"actions":[{"type":"Action.OpenUrl","title":"View Pipeline","url":$url}]}}]}')
+            curl -sS --request POST --header "Content-Type: application/json" --data "$cardMsg" $MS_TEAMS_WEBHOOK_URL
+        else
+          echo "MS Teams webhook URL has not be set" && exit 0
+        fi
+      fi
+    - ""
+  .pulse-dashboard-hook: &snippet_pulse_dashboard_hook
+    - "# --- push pipeline details to the pulse dashboard -----------------------"
+    - |
+      set +e  # don't exit on error if curl request fails
+      STACK_ENV=$(echo ${CI_JOB_NAME} | sed -E 's/^([a-zA-Z]+)(\:.+)*/\1/g')
+      if [[ ${STACK_ENV} != "review" && ${CI_JOB_NAME} == *:*:app ]]; then
+        if [[ -v PULSE_DASHBOARD_WEBHOOK_URL ]] && [[ ! -z "${PULSE_DASHBOARD_WEBHOOK_URL}" ]]; then
+          PIPELINE_TYPE=non-prod
+          if [[ ${CI_JOB_STAGE} == "prd" ]] || [[ ${CI_JOB_STAGE} == "stg" ]]; then
+              PIPELINE_TYPE=prod
+          fi
+          GROUP_DETAILS=$(
+              curl -s -X GET --header "PRIVATE-TOKEN: ${BOT_GITLAB_TOKEN}" \
+              ${CI_API_V4_URL}/projects/$CI_PROJECT_ID
+            )
+          JOB_DETAILS=$(
+              curl -s -X GET --header "PRIVATE-TOKEN: ${BOT_GITLAB_TOKEN}" \
+              ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/jobs/$CI_JOB_ID | jq --arg status "$CI_JOB_STATUS" '.status = $status'
+          )
+          GROUP_ID=$(echo "$GROUP_DETAILS" | jq -r .namespace.id)
+          GROUP_NAME=$(echo "$GROUP_DETAILS" | jq -r .name_with_namespace)
+          GOLANG_REPO=$(find $(pwd) -type f -name 'go.mod' | sed -r 's|/[^/]+$||' | grep -v "devops")
+          DOTNET_REPO=$(find $(pwd) -type f -name '*.sln' | sed -r 's|/[^/]+$||' | grep -v "devops")
+          NODE_REPO=$(find $(pwd) -type f -name 'package.json' | sed -r 's|/[^/]+$||' | grep -v "devops")
+          PYTHON_REPO=$(find $(pwd) -type f -name 'requiremenets.txt' | sed -r 's|/[^/]+$||' | grep -v "devops")
+          if [[ ! -z ${GOLANG_REPO} ]];then
+            PROJECT_RUNTIME="Golang"
+          elif [[ ! -z ${DOTNET_REPO} ]];then
+            PROJECT_RUNTIME="Dotnet"
+          elif [[ ! -z ${NODE_REPO} ]];then
+            PROJECT_RUNTIME="Nodejs"
+          elif [[ ! -z ${PYTHON_REPO} ]];then
+            PROJECT_RUNTIME="Python"
+          else
+            PROJECT_RUNTIME="Unknown"
+          fi
+          if grep -qE "AWS::ECS::Service" "aws.cfn.app.yml" && grep -qE "AWS::Serverless::Api|AWS::Serverless::Function" "aws.cfn.app.yml";then
+            PROJECT_AWS_PLATFORM="ECS and Serverless"
+          elif grep -qE "AWS::ECS::Service" "aws.cfn.app.yml";then
+            PROJECT_AWS_PLATFORM="ECS"
+          elif grep -qE "AWS::Serverless::Api|AWS::Serverless::Function" "aws.cfn.app.yml";then
+            PROJECT_AWS_PLATFORM="Serverless"
+          else
+            PROJECT_AWS_PLATFORM="Unknown"
+          fi
+          export json_string=$(jq -n \
+          --arg pipeline_id $CI_PIPELINE_ID \
+          --arg deployment_duration 0 \
+          --arg project_id $CI_PROJECT_ID \
+          --arg project_name "$CI_PROJECT_NAME" \
+          --arg project_url "$CI_PROJECT_URL" \
+          --arg group_id $GROUP_ID \
+          --arg group_name "$GROUP_NAME" \
+          --arg pipeline_url "$CI_PIPELINE_URL" \
+          --arg pipeline_type "$PIPELINE_TYPE" \
+          --arg project_type "Standard" \
+          --arg project_runtime "${PROJECT_RUNTIME}" \
+          --arg project_aws_platform "${PROJECT_AWS_PLATFORM}" \
+          --argjson job "$JOB_DETAILS" \
+          '{
+              "pipeline_id": $pipeline_id,
+              "deployment_duration": $deployment_duration,
+              "project_id": $project_id,
+              "project_name": $project_name,
+              "project_url": $project_url,
+              "group_id": $group_id,
+              "group_name": $group_name,
+              "pipeline_url": $pipeline_url,
+              "pipeline_type": $pipeline_type,
+              "project_type": $project_type,
+              "project_runtime": $project_runtime,
+              "project_platform": $project_aws_platform,
+              "job": $job
+          }')
+
+          curl -X POST https://$PULSE_DASHBOARD_WEBHOOK_URL \
+            -H  "Content-Type: application/json" \
+            -d "$json_string" || true
+        else
+          echo "Pulse dahsboard webhook URL has not be set" && exit 0
+        fi
+      fi
+    - ""
+
+  .gitlab-badge: &snippet_gitlab_badge
+    - "# --- Setting up gitlab badge -----------------------------------------"
+    - |
+      set +e  # don't exit on error if curl request fails
+      if [[ ${CI_JOB_STAGE} == "int" ]]; then
+        BADGE_NAME=projectType
+        BADGE_EXISTS=$(curl -s --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/badges" | jq --arg BADGE_NAME "$BADGE_NAME" -r '.[] | select(.name == $BADGE_NAME)')
+        if [[ ! -n "$BADGE_EXISTS" ]]; then
+          curl -sSf --request POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/badges" --header "PRIVATE-TOKEN:${BOT_GITLAB_TOKEN}" \
+            --data "link_url=https://gitlab.connectwisedev.com/${CI_PROJECT_PATH}" \
+            --data "image_url=https://img.shields.io/badge/Project_Type-Self--Service-2CA5E0%26logo%3DProjectSelf%26logoColor%3Dwhite" \
+            --data "kind=project" \
+            --data "name=projectType" > /dev/null 2>&1 || true
+        fi
+      fi
+    - |
+      set +e  # don't exit on error if curl request fails
+      # to check sonar and quality badge exist or not, if not then will create it
+      if [[ ${CI_JOB_STAGE} == "test"  && ( ${CI_JOB_NAME} == "test:coverage-sonar"* ) ]]; then
+        TOKEN=$(curl -su ${SONAR_TOKEN}: -X GET "$TOOLING_SONAR_HOST/api/project_badges/token?project=${CI_PROJECT_NAME}" | jq -r .token)
+        if [[ $TOKEN ]]; then
+          # Badges array to be defined with badge_name:metric
+          BADGES=("qualitygate:alert_status" "sonarcoverage:coverage")
+          # Creates a badge if it doesn't exist
+          function create_badge {
+            local BADGE_NAME="$1"
+            local BADGE_METRIC="$2"
+            GET_BADGE="${SONAR_HOST_URL}/api/project_badges/measure?project=${CI_PROJECT_NAME}&metric=${BADGE_METRIC}&token=${TOKEN}"
+            curl -sSf --request POST "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/badges" --header "PRIVATE-TOKEN:${BOT_GITLAB_TOKEN}" \
+              --data "link_url=https://gitlab.connectwisedev.com/${CI_PROJECT_PATH}" \
+              --data-urlencode "image_url=$GET_BADGE" \
+              --data "kind=project" \
+              --data "name=$BADGE_NAME" > /dev/null 2>&1 || true
+          }
+          # Iterate through badges array
+          for BADGE_INFO in "${BADGES[@]}"; do
+            IFS=":" read -r BADGE_NAME BADGE_METRIC <<< "$BADGE_INFO"
+            # Checks if the badges exist
+            BADGE_EXISTS=$(curl -s --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/badges" | jq --arg BADGE_NAME "$BADGE_NAME" -r '.[] | select(.name == $BADGE_NAME)')
+            if [[ ! -n "$BADGE_EXISTS" ]]; then
+              create_badge "$BADGE_NAME" "$BADGE_METRIC"
+            fi
+          done
+        fi
+      fi
+    - ""
+
+.dist-snippets:
+  .publish-python-dist: &snippet_publish_python_dist
+    - "# --- python: detect language -----------------------------------------"
+    - |
+      if [[ $(echo "$JOB_DIST_LANGUAGE" | tr '[:upper:]' '[:lower:]') == "python" ]]; then
+        echo "language detected: Python"
+        export TWINE_USERNAME=${JOB_ARTIFACT_REPO_USER:-$STACK_SERVICE_NAME}
+        export TWINE_PASSWORD=${JOB_ARTIFACT_REPO_PASS:-$ARTIFACTORY_DEPLOYER_SECRET}
+        export TWINE_REPOSITORY=$JOB_ARTIFACT_REPO_URL/${JOB_ARTIFACT_REPO_PATH:-artifactory/api/pypi/pf-pypi-local}
+        export TWINE_REPOSITORY_URL=$TWINE_REPOSITORY
+        pip3 install twine
+        for f in dist/*; do
+          mv "$f" $(echo $f | sed -E "s/(${STACK_VERSION_RELEASE})/\1.dev${CI_COMMIT_SHA}/")
+        done
+        twine upload --non-interactive dist/*
+        exit 0
+      fi
+    - ""
+
+  .publish-dotnet-dist: &snippet_publish_dotnet_dist
+    - "# --- dotnet: detect language -----------------------------------------"
+    - |
+      if [[ $(echo "$JOB_DIST_LANGUAGE" | tr '[:upper:]' '[:lower:]') == "dotnet" ]]; then
+        echo "language not implemented: dotnet"
+        exit 1
+      fi
+    - ""
+
+  .publish-golang-dist: &snippet_publish_golang_dist
+    - "# --- golang: detect language -----------------------------------------"
+    - |
+      if [[ $(echo "$JOB_DIST_LANGUAGE" | tr '[:upper:]' '[:lower:]') == "golang" ]]; then
+        echo "language not implemented: golang"
+        exit 1
+      fi
+    - ""
+
+  .publish-nodejs-dist: &snippet_publish_nodejs_dist
+    - "# --- nodejs: detect language -----------------------------------------"
+    - |
+      if [[ $(echo "$JOB_DIST_LANGUAGE" | tr '[:upper:]' '[:lower:]') == "nodejs" ]]; then
+        echo "language not implemented: nodejs"
+        exit 1
+      fi
+    - ""
+
+# --------------------------------------------------------------------- fns ---
+
+.fn:cfn-deploy: &snippet_fn_cfn_deploy
+  - |
+    function cfn_deploy {
+      local STACK_NAME=${1}
+      local STACK_TEMPLATE=${2}
+      local S3_STACK_TEMPLATE="aws.cfn.app.output.yml"
+      local STACK_TIER=$(echo ${STACK_NAME} | sed -E 's/\w+-\w+-(\w+)/\1/g')
+      local STACK_ENV=$(echo ${CI_JOB_NAME} | sed -E 's/^([a-zA-Z\-]+)(\:.+)*/\1/g')
+      if [[ "${STACK_RESOURCE_DELETION_POLICY}" == "DISABLED" ]]; then
+        sed -i "/DeletionPolicy\:\ /d"  ${STACK_TEMPLATE}
+        sed -i "/DeletionProtection\:\ /d" ${STACK_TEMPLATE}
+        sed -i "/UpdateReplacePolicy\:\ /d" ${STACK_TEMPLATE}
+      fi
+      if [[ -z "${STACK_ENV_TYPE}" ]]; then
+        STACK_ENV_TYPE=$(( [[ "${CI_JOB_NAME}" =~ ^(inf|int|qa|perf|stg|prd).*$ ]] && echo "${CI_JOB_NAME}" | sed -E 's/^([a-zA-Z]+)(\:.+)*/\1/g' ) || ( [[ "${CI_JOB_NAME}" =~ ^(vendorintprod).*$ ]] && echo "prd" ) || echo "dev");
+      fi
+      local TEMPLATE_SIZE=$(find . -name "$STACK_TEMPLATE" -exec stat -c %s {} \;)
+      if [[ $TEMPLATE_SIZE -le 51200 ]]; then
+        local TEMPLATE_PATH="--template-file $STACK_TEMPLATE"
+      else
+        local S3_PREFIX="cfn/$CI_COMMIT_SHA/$S3_STACK_TEMPLATE"
+        aws cloudformation package --template-file "${STACK_TEMPLATE}" --s3-bucket ${CORE_STACK_ARTIFACT_S3_BUCKET} --s3-prefix ${S3_PREFIX} --output-template-file ${S3_STACK_TEMPLATE}
+        local TEMPLATE_PATH="--template-file $S3_STACK_TEMPLATE --s3-bucket $CORE_STACK_ARTIFACT_S3_BUCKET --s3-prefix $S3_PREFIX"
+      fi
+      aws cloudformation deploy --stack-name ${STACK_NAME} ${TEMPLATE_PATH} \
+        --parameter-overrides \
+          StackEnv=${STACK_ENV} \
+          StackJobName=${STACK_JOB_ENV} \
+          StackTier=${STACK_TIER} \
+          StackType=${ACCOUNT_LEVEL} \
+          StackVersion=${STACK_VERSION_RELEASE} \
+          StackVersionSha=${CI_COMMIT_SHA} \
+          StackVersionType=${STACK_TARGETED_VERSION} \
+          VpcEdgeProxyInternalElbListenerArn="/pf-vpcedge-${STACK_ENV_TYPE}/resources/elb/listener/proxy-internal/arn" \
+          VpcEdgeProxyPublicElbListenerArn="/pf-vpcedge-${STACK_ENV_TYPE}/resources/elb/listener/proxy-public/arn" \
+          "${@:3}" \
+        --tags \
+          service_name=${STACK_SERVICE_NAME} \
+          service_env=${STACK_ENV} \
+          service_tier=${STACK_TIER} \
+          service_version=${STACK_VERSION_RELEASE} \
+          territory=${BILLING_TAG_TERRITORY} \
+          region=${AWS_DEFAULT_REGION} \
+          business_unit=${BILLING_TAG_BUSINESS_UNIT} \
+          department=${BILLING_TAG_DEPARTMENT} \
+          product=${BILLING_TAG_PRODUCT} \
+          class=${BILLING_TAG_CLASS} \
+          subclass=${ACCOUNT_TYPE} \
+          ci:job:id=${CI_JOB_ID} \
+          ci:pipeline:id=${CI_PIPELINE_IID}.${CI_PIPELINE_ID} \
+          scm:project:branch=${CI_COMMIT_REF_SLUG} \
+          scm:project:url=${CI_PROJECT_URL} \
+          scm:project:id=${CI_PROJECT_ID}
+    }
+  - export -f cfn_deploy
+
+.fn:sam-deploy: &snippet_fn_sam_deploy
+  - |
+    function sam_deploy {
+      local STACK_NAME=${1}
+      local STACK_TEMPLATE=${2}
+      local STACK_TIER=$(echo ${STACK_NAME} | sed -E 's/\w+-\w+-(\w+)/\1/g')
+      local STACK_ENV=$(echo ${CI_JOB_NAME} | sed -E 's/^([a-zA-Z]+)(\:.+)*/\1/g')
+      if [[ "${STACK_RESOURCE_DELETION_POLICY}" == "DISABLED" ]]; then
+        sed -i "/DeletionPolicy\:\ /d"  ${STACK_TEMPLATE}
+        sed -i "/DeletionProtection\:\ /d" ${STACK_TEMPLATE}
+        sed -i "/UpdateReplacePolicy\:\ /d" ${STACK_TEMPLATE}
+      fi
+      if [[ -z "${STACK_ENV_TYPE}" ]]; then
+        STACK_ENV_TYPE=$(( [[ "${CI_JOB_NAME}" =~ ^(inf|int|qa|perf|stg|prd).*$ ]] && echo "${CI_JOB_NAME}" | sed -E 's/^([a-zA-Z]+)(\:.+)*/\1/g' ) || ( [[ "${CI_JOB_NAME}" =~ ^(vendorintprod).*$ ]] && echo "prd" ) || echo "dev");
+      fi
+      export JOB_ECR_REPO=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/ecr/repository/$JOB_DOCKER_IMAGE_NAME/full-name --query 'Parameter.Value' --output text)
+      if [[ ! -z "${JOB_ECR_REPO}" ]]; then
+        local IMAGE_REPO="--image-repository ${JOB_ECR_REPO}"
+      else
+        local IMAGE_REPO=""
+      fi
+      export SAM_CLI_TELEMETRY=0
+      sam deploy --stack-name ${STACK_NAME} --template-file ${STACK_TEMPLATE} ${IMAGE_REPO} \
+        --parameter-overrides \
+          StackEnv=${STACK_ENV} \
+          StackJobName=${STACK_JOB_ENV} \
+          StackTier=${STACK_TIER} \
+          StackType=${ACCOUNT_LEVEL} \
+          StackVersion=${STACK_VERSION_RELEASE} \
+          StackVersionSha=${CI_COMMIT_SHA} \
+          StackVersionType=${STACK_TARGETED_VERSION} \
+          ${@:3} \
+        --tags \
+          service_name=${STACK_SERVICE_NAME} \
+          service_env=${STACK_ENV} \
+          service_tier=${STACK_TIER} \
+          service_version=${STACK_VERSION_RELEASE} \
+          territory=${BILLING_TAG_TERRITORY} \
+          region=${AWS_DEFAULT_REGION} \
+          business_unit=${BILLING_TAG_BUSINESS_UNIT} \
+          department=${BILLING_TAG_DEPARTMENT} \
+          product=${BILLING_TAG_PRODUCT} \
+          class=${BILLING_TAG_CLASS} \
+          subclass=${ACCOUNT_TYPE} \
+          ci:job:id=${CI_JOB_ID} \
+          ci:pipeline:id=${CI_PIPELINE_IID}.${CI_PIPELINE_ID} \
+          scm:project:branch=${CI_COMMIT_REF_SLUG} \
+          scm:project:url=${CI_PROJECT_URL} \
+          scm:project:id=${CI_PROJECT_ID}
+    }
+  - export -f sam_deploy
+
+.fn:cfn-cleanup: &snippet_fn_cfn_cleanup
+  - |
+    function cfn_cleanup {
+      local STACK_NAME=${1}
+      local DELETE_STACK=${2:-$JOB_DELETE_STACK}
+
+      if [[ "${STACK_RESOURCE_DELETION_POLICY}" == "DISABLED" ]]; then
+        STACK_S3_BUCKETS=$(aws cloudformation describe-stack-resources --stack-name "${STACK_NAME}" --query "StackResources[?ResourceType=='AWS::S3::Bucket'].PhysicalResourceId" --output text)
+        for BUCKET_NAME in ${STACK_S3_BUCKETS}; do
+          [[ -z ${BUCKET_NAME} ]] && continue
+          echo "deleting all objects in bucket: ${BUCKET_NAME}"
+          aws s3 rm "s3://${BUCKET_NAME}" --recursive
+        done
+
+        STACK_VPC_EP_SVCS=$(aws cloudformation describe-stack-resources --stack-name "${STACK_NAME}" --query "StackResources[?ResourceType=='AWS::EC2::VPCEndpointService'].PhysicalResourceId" --output text)
+        for VPC_EP_SVC in ${STACK_VPC_EP_SVCS}; do
+          [[ -z ${VPC_EP_SVC} ]] && continue
+          echo "rejecting all vpc endpoint connections: ${VPC_EP_SVC}"
+          VPC_EP_SVC_CONNECTIONS=$(aws ec2 describe-vpc-endpoint-connections --filters Name=service-id,Values="${VPC_EP_SVC}" --query "VpcEndpointConnections[*].VpcEndpointId" --output text)
+          for VPC_EP_SVC_CONNECTION in ${VPC_EP_SVC_CONNECTIONS}; do
+            [[ -z ${VPC_EP_SVC_CONNECTION} ]] && continue
+            aws ec2 reject-vpc-endpoint-connections --service-id "${VPC_EP_SVC}" --vpc-endpoint-ids "${VPC_EP_SVC_CONNECTION}"
+          done
+        done
+      fi
+
+      if [[ "${DELETE_STACK}" == "1" ]]; then
+        STACK_ID=$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query 'Stacks[0].StackId' --output text 2>/dev/null)
+        if [[ -n "${STACK_ID}" ]]; then
+          aws cloudformation update-termination-protection --stack-name "${STACK_NAME}" --no-enable-termination-protection
+          aws cloudformation delete-stack --stack-name "${STACK_NAME}"
+          aws cloudformation wait stack-delete-complete --stack-name "${STACK_ID}"
+        fi
+      fi
+    }
+  - export -f cfn_cleanup
+
+.fn:pull-release-image: &snippet_fn_pull_release_image
+  - |
+    function pull_release_image {
+      local IMG_NAME=${1}
+      local STACK_VERSION=${2:-release}
+      local IMG_TAG=${3:-$CI_COMMIT_TAG}
+      local IMG_REGION=${4:-$AWS_DEFAULT_REGION}
+
+      export AWS_ACCESS_KEY_ID=${PROD_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${PROD_AWS_SECRET_ACCESS_KEY}
+
+      if [ ${STACK_VERSION} == "build" ]; then
+        export AWS_ACCESS_KEY_ID=${DEV_AWS_ACCESS_KEY_ID}
+        export AWS_SECRET_ACCESS_KEY=${DEV_AWS_SECRET_ACCESS_KEY}
+        export IMG_TAG=sha-${CI_COMMIT_SHA}
+      fi
+
+      local SRC_ECR_REPO=$(aws ssm get-parameter --name /${CORE_STACK_NAME}/resources/ecr/repository/${IMG_NAME}/full-name --query 'Parameter.Value' --output text --region ${ARTIFACT_AWS_DEFAULT_REGION:-us-east-1})
+      docker pull ${SRC_ECR_REPO}:${IMG_TAG}
+
+      export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
+
+      local DST_ECR_REPO=$(aws ssm get-parameter --name /${CORE_STACK_NAME}/resources/ecr/repository/${IMG_NAME}/full-name --query 'Parameter.Value' --output text --region ${IMG_REGION})
+      docker tag ${SRC_ECR_REPO}:${IMG_TAG} ${DST_ECR_REPO}:${IMG_TAG}
+      docker push ${DST_ECR_REPO}:${IMG_TAG}
+    }
+  - export -f pull_release_image
+
+.fn:pull-dbartifacts-zip-from-s3: &snippet_fn_pull_dbartifacts_zip_from_s3
+  - |
+    function pull_dbartifacts_zip_from_s3 {
+      local PGK_NAME=${1:-dbartifacts.zip}
+      local STACK_VERSION=${2:-release}
+      local SRC_S3_PATH=${3:-builds/$CI_COMMIT_SHA}
+      local DST_S3_PATH=${4:-builds/$CI_COMMIT_SHA}
+
+      export TMP_LOCAL_DIR=./artifacts
+      mkdir -p ${TMP_LOCAL_DIR}
+
+      export AWS_ACCESS_KEY_ID=${PROD_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${PROD_AWS_SECRET_ACCESS_KEY}
+
+      if [ ${STACK_VERSION} == "build" ]; then
+        export AWS_ACCESS_KEY_ID=${DEV_AWS_ACCESS_KEY_ID}
+        export AWS_SECRET_ACCESS_KEY=${DEV_AWS_SECRET_ACCESS_KEY}
+      fi
+
+      export SRC_S3_BUCKET=$(aws ssm get-parameter --name /${CORE_STACK_NAME}/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text --region us-east-1)
+      aws s3 cp s3://${SRC_S3_BUCKET}/${SRC_S3_PATH}/${PGK_NAME} ./${TMP_LOCAL_DIR}/${PGK_NAME}
+      ls -la ./${TMP_LOCAL_DIR}/
+
+      export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
+
+      export DST_S3_BUCKET=$(aws ssm get-parameter --name /${CORE_STACK_NAME}/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text)
+      aws s3 cp ./${TMP_LOCAL_DIR}/${PGK_NAME} s3://${DST_S3_BUCKET}/${DST_S3_PATH}/${PGK_NAME} --region ${AWS_DEFAULT_REGION}
+      aws s3 ls s3://${DST_S3_BUCKET}/${DST_S3_PATH}/${PGK_NAME} --region ${AWS_DEFAULT_REGION}
+    }
+  - export -f pull_dbartifacts_zip_from_s3
+
+.fn:pull-release-zip-from-s3: &snippet_fn_pull_release_zip_from_s3
+  - |
+    function pull_release_zip_from_s3 {
+      local PGK_NAME=${1:-package.zip}
+      local STACK_VERSION=${2:-release}
+      local SRC_S3_PATH=${3:-releases/$STACK_VERSION_RELEASE}
+      local DST_S3_PATH=${4:-releases/$STACK_VERSION_RELEASE}
+
+      export TMP_LOCAL_DIR=./artifacts
+      mkdir -p ${TMP_LOCAL_DIR}
+
+      export AWS_ACCESS_KEY_ID=${PROD_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${PROD_AWS_SECRET_ACCESS_KEY}
+
+      if [ ${STACK_VERSION} == "build" ]; then
+        export AWS_ACCESS_KEY_ID=${DEV_AWS_ACCESS_KEY_ID}
+        export AWS_SECRET_ACCESS_KEY=${DEV_AWS_SECRET_ACCESS_KEY}
+        export SRC_S3_PATH=builds/$CI_COMMIT_SHA
+        export DST_S3_PATH=builds/$CI_COMMIT_SHA
+      fi
+
+      export SRC_S3_BUCKET=$(aws ssm get-parameter --name /${CORE_STACK_NAME}/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text --region us-east-1)
+      aws s3 cp s3://${SRC_S3_BUCKET}/${SRC_S3_PATH}/${PGK_NAME} ./${TMP_LOCAL_DIR}/${PGK_NAME}
+      ls -la ./${TMP_LOCAL_DIR}/
+
+      export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
+
+      export DST_S3_BUCKET=$(aws ssm get-parameter --name /${CORE_STACK_NAME}/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text)
+      aws s3 cp ./${TMP_LOCAL_DIR}/${PGK_NAME} s3://${DST_S3_BUCKET}/${DST_S3_PATH}/${PGK_NAME} --region ${AWS_DEFAULT_REGION}
+      aws s3 ls s3://${DST_S3_BUCKET}/${DST_S3_PATH}/${PGK_NAME} --region ${AWS_DEFAULT_REGION}
+    }
+  - export -f pull_release_zip_from_s3
+
+.fn:run-pipeline-job: &snippet_run_pipeline_job
+  - |
+    function run_pipeline_job {
+      local JOB_NAME=${1}
+      JOB_ID=$(
+        curl -s -X GET --header "PRIVATE-TOKEN: ${BOT_GITLAB_TOKEN}" \
+          ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs \
+        | jq -c 'map ( select(.name=='\"${JOB_NAME}\"') )[0] | .id' \
+      )
+      if [[ -z "${JOB_ID}" || "${JOB_ID}" == "null" ]]; then
+        echo "job to retry is not found: ${JOB_NAME}"
+        return 0
+      fi
+      JOB_STATUS=$(
+        curl -s -X GET --header "PRIVATE-TOKEN: ${BOT_GITLAB_TOKEN}" \
+          ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/jobs/${JOB_ID} | jq -r -c '.status'
+      )
+      if [[ "${JOB_STATUS}" == "manual" ]]; then
+        curl -s -X POST --header "PRIVATE-TOKEN: ${BOT_GITLAB_TOKEN}" \
+          ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/jobs/${JOB_ID}/play
+      elif [[ "${JOB_STATUS}" =~ ^failed|canceled|success$ ]]; then
+        curl -s -X POST --header "PRIVATE-TOKEN: ${BOT_GITLAB_TOKEN}" \
+          ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/jobs/${JOB_ID}/retry
+      elif [[ "${JOB_STATUS}" =~ ^running|started|pending$ ]]; then
+        echo "deploy job is in a running state"
+      else
+        echo "unknown job state: ${JOB_STATUS}"
+      fi
+    }
+  - export -f run_pipeline_job
+
+.fn:pull-artifacts-from-artifactory: &snippet_pull_artifacts_from_artifactory
+  - |
+    function pull_artifacts_from_artifactory {
+      local PGK_NAME=${1:-package.zip}
+      local STACK_VERSION_BUILD=${2:-$STACK_VERSION_BUILD}
+      local SRC_ARTIFACTORY_PATH=${3:-juno-ms-nonprod-local/$CI_PROJECT_NAME}
+
+      local ARTIFACT_REPO_URL=https://artifactory.connectwisedev.com/artifactory
+
+      if [[ "${STACK_TARGETED_VERSION}" == "release" ]]; then
+        echo "downloading artifact from prod repo"
+        local SRC_ARTIFACTORY_PATH="juno-ms-prod-local/${CI_PROJECT_NAME}"
+        curl -sSf -X GET -u "${JOB_ARTIFACT_REPO_USER}:${JOB_ARTIFACT_REPO_PASS}" -O ${ARTIFACT_REPO_URL}/${SRC_ARTIFACTORY_PATH}/${STACK_VERSION_BUILD}/${PGK_NAME} -o ${PGK_NAME}
+      else
+        echo "downloading artifact from non-prod repo"
+        curl -sSf -X GET -u "${JOB_ARTIFACT_REPO_USER}:${JOB_ARTIFACT_REPO_PASS}" -O ${ARTIFACT_REPO_URL}/${SRC_ARTIFACTORY_PATH}/${STACK_VERSION_BUILD}/${PGK_NAME} -o ${PGK_NAME}
+      fi
+      echo "artifact version name = ${STACK_VERSION_BUILD}"
+    }
+  - export -f pull_artifacts_from_artifactory
+
+.fn:fetch-ssm-param-cross-account: &snippet_fetch_ssm_param_cross_account
+  - |
+    function fetch_ssm_param_cross_account {
+      local ASSUME_ROLE_ARN=${1}
+      local SSM_PARAMETER_NAME=${2}
+
+      ORIGINAL_AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      ORIGINAL_AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+
+      assume_role_object=$(aws sts assume-role --role-arn "${ASSUME_ROLE_ARN}" --role-session-name fetch-ssm-param --duration-seconds 900)
+
+      export AWS_ACCESS_KEY_ID=$(echo $assume_role_object | jq -r .'Credentials.AccessKeyId')
+      export AWS_SECRET_ACCESS_KEY=$(echo $assume_role_object | jq -r .'Credentials.SecretAccessKey')
+      export AWS_SESSION_TOKEN=$(echo $assume_role_object | jq -r .'Credentials.SessionToken')
+
+      aws ssm get-parameter --name "${SSM_PARAMETER_NAME}" --query 'Parameter.Value' --output text --region "${AWS_DEFAULT_REGION}"
+
+      export AWS_ACCESS_KEY_ID=$ORIGINAL_AWS_ACCESS_KEY_ID
+      export AWS_SECRET_ACCESS_KEY=$ORIGINAL_AWS_SECRET_ACCESS_KEY
+      export AWS_SESSION_TOKEN=""
+    }
+  - export -f fetch_ssm_param_cross_account
+
+.fn:set-task-count: &snippet_set_task_count
+  - |
+    function set_task_count {
+      local STACK_NAME=${1}
+      local STACK_ENV=$(echo ${CI_JOB_NAME} | sed -E 's/^([a-zA-Z\-]+)(\:.+)*/\1/g')
+      STACK_EXISTS_CHECK=$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].StackName" --output text 2>&1 || true)
+      if [[ "${STACK_EXISTS_CHECK}" != "${STACK_NAME}" ]]; then
+        echo "stack does not exist: ${STACK_NAME}"
+        return 0
+      fi
+      ECS_SERVICES=$(aws cloudformation describe-stack-resources --stack-name "${STACK_NAME}" --query "StackResources[?ResourceType=='AWS::ECS::Service'].PhysicalResourceId" --output text)
+      for SERVICE_ID in ${ECS_SERVICES}; do
+        [[ -z ${SERVICE_ID} ]] && continue
+        echo "Updating the number of containers for service: ${SERVICE_ID}"
+        CLUSTER_NAME=$(echo "${SERVICE_ID}" | awk -F'/' '{print $2}')
+        SERVICE_NAME=$(echo "${SERVICE_ID}" | awk -F'/' '{print $3}')
+        aws application-autoscaling register-scalable-target --service-namespace "ecs" --scalable-dimension "ecs:service:DesiredCount" --resource-id "service/${CLUSTER_NAME}/${SERVICE_NAME}" --min-capacity "1" --max-capacity "1"
+        aws ecs update-service --cluster "${CLUSTER_NAME}" --service "${SERVICE_NAME}" --desired-count "1" --query "service.[serviceArn,deployments[].desiredCount]"
+      done
+    }
+  - export -f set_task_count
+
+# =============================================================== templates ===
+
+.job-run-script:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  variables:
+    JOB_SCRIPT_PATH: "undefined.sh"
+  services:
+    - docker:25.0.5-dind
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_aws_config
+    - *snippet_set_shared_vars
+    - ""
+    - "# --- define fns ------------------------------------------------------"
+    - *snippet_fn_cfn_deploy
+    - *snippet_fn_sam_deploy
+    - *snippet_fn_pull_release_image
+    - *snippet_fn_pull_dbartifacts_zip_from_s3
+    - *snippet_fn_cfn_cleanup
+    - *snippet_run_pipeline_job
+    - *snippet_pull_artifacts_from_artifactory
+    - *snippet_fn_pull_release_zip_from_s3
+    - *snippet_fetch_ssm_param_cross_account
+    - *snippet_set_task_count
+    - ""
+    - "# --- set variables ---------------------------------------------------"
+    - STACK_TARGETED_VERSION=${STACK_TARGETED_VERSION:-$APP_STACK_TARGETED_VERSION}; export STACK_TARGETED_VERSION
+    - STACK_ENV_TYPE=$(( [[ "${CI_JOB_NAME}" =~ ^(inf|int|qa|perf|stg|prd).*$ ]] && echo "${CI_JOB_NAME}" | sed -E 's/^([a-zA-Z]+)(\:.+)*/\1/g' ) || ( [[ "${CI_JOB_NAME}" =~ ^(vendorintprod).*$ ]] && echo "prd" ) || echo "dev"); export STACK_ENV_TYPE
+    - APP_STACK_TIER=$(echo "${STACK_VERSION_RELEASE}" | sed -r "s/^[vV]*(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/$APP_STACK_TIER_PATTERN/"); export APP_STACK_TIER
+    - APP_STACK_NAME=${STACK_SERVICE_NAME}-${APP_STACK_TIER}; export APP_STACK_NAME
+    - APP_STACK_VERSION=$([ "${STACK_TARGETED_VERSION}" == "release" ] && echo "${STACK_VERSION_RELEASE}" || echo "${STACK_VERSION_BUILD}"); export APP_STACK_VERSION
+    - printenv | grep -E "${CICD_VAR_PATTERN}" | sort
+    - ""
+    - "# --- run script ------------------------------------------------------"
+    - bash $JOB_SCRIPT_PATH
+    - ""
+    - "# --- set task count --------------------------------------------------"
+    - |
+      if [ "${APP_STACK_ENV}" == "stg" ]; then
+        set_task_count "${APP_STACK_NAME}"
+      fi
+    - ""
+  after_script:
+    - *snippet_ms_teams_notifications
+    - *snippet_pulse_dashboard_hook
+    - *snippet_gitlab_badge
+
+.job-test-cfn:
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables -----------------------------------------------------"
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- validate template -------------------------------------------------"
+    - |
+      if [[ -z ${CORE_STACK_ARTIFACT_S3_BUCKET} ]]; then
+        for template in aws.cfn.*.yml; do aws cloudformation validate-template --template-body file://$template; done
+      else
+        for template in aws.cfn.*.yml; do
+          aws s3 cp $template s3://${CORE_STACK_ARTIFACT_S3_BUCKET}/${CI_COMMIT_SHA}/test-cfn/$template
+          aws cloudformation validate-template --template-url https://$CORE_STACK_ARTIFACT_S3_BUCKET.s3.amazonaws.com/${CI_COMMIT_SHA}/test-cfn/$template
+        done
+      fi
+    - ""
+
+.job-test-coverage:
+  variables:
+    JOB_COVERAGE_THRESHOLD: 80
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - >-
+      export JOB_COVERAGE_VALUE=$(curl --request GET --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" -s "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID" | jq -r '.coverage')
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- test coverage ---------------------------------------------------"
+    - git fetch --tags
+    - |
+      if [[ $JOB_COVERAGE_THRESHOLD == 0 ]]; then
+        echo "skipped: coverage threshold is 0"
+      elif [[ -z $JOB_COVERAGE_VALUE || $JOB_COVERAGE_VALUE = "null" ]]; then
+        echo "failed: unable to retrieve test coverage percentage; ensure test coverage parsing is defined in project's ci settings"
+        exit 1
+      elif [[ $(echo "$JOB_COVERAGE_VALUE >= $JOB_COVERAGE_THRESHOLD" | bc -q) -eq 1 ]]; then
+        echo "success: $JOB_COVERAGE_VALUE above the min coverage threshold of $JOB_COVERAGE_THRESHOLD"
+      else
+        echo "failed: $JOB_COVERAGE_VALUE below the min coverage threshold of $JOB_COVERAGE_THRESHOLD"
+        exit 1
+      fi
+
+.job-test-coverage-sonar:
+  image: sonarsource/sonar-scanner-cli:4.8.0
+  variables:
+    SONAR_HOST_URL: $TOOLING_SONAR_HOST
+    SONAR_TOKEN: $TOOLING_SONAR_TOKEN
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - *snippet_print_ci_vars
+    - "# --- install dependencies --------------------------------------------"
+    - apk --no-cache add gettext jq
+    - "# --- test coverage ---------------------------------------------------"
+    - cat sonar-project.properties | envsubst > /tmp/sonar-project.properties
+    - mv /tmp/sonar-project.properties sonar-project.properties
+    - |
+      if [[ ! -z $CI_MERGE_REQUEST_TARGET_BRANCH_NAME ]];then
+        sonar-scanner \
+          -Dsonar.qualitygate.wait=true \
+          -Dsonar.scanner.metadataFilePath=${SONAR_USER_HOME}/report-task.txt \
+          -Dsonar.pullrequest.branch=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME \
+          -Dsonar.pullrequest.base=$CI_MERGE_REQUEST_TARGET_BRANCH_NAME \
+          -Dsonar.pullrequest.key=$CI_MERGE_REQUEST_IID \
+          -Dsonar.pullrequest.gitlab.repositorySlug=$CI_PROJECT_ID
+      else
+        sonar-scanner \
+          -Dsonar.qualitygate.wait=true \
+          -Dsonar.scanner.metadataFilePath=${SONAR_USER_HOME}/report-task.txt \
+          -Dsonar.branch.name=$CI_COMMIT_REF_SLUG
+      fi
+    - CE_TASK_ID="$(cat .sonar/report-task.txt | grep ceTaskId | cut -d '=' -f2)"
+    - wait_for_success=true
+    - |
+      while [[ "${wait_for_success}" == "true" ]]
+      do
+        CE_STATUS="$(curl -su ${SONAR_TOKEN}: "${SONAR_HOST_URL}/api/ce/task?id=${CE_TASK_ID}" | jq -r .task.status)"
+        echo "SonarQube job status : ${CE_STATUS}"
+        if [[ "${CE_STATUS}" == "CANCELLED" || "${CE_STATUS}" == "FAILED" ]];then
+          echo "failed: SonarQube job status is ${CE_STATUS}" && exit 1
+        fi
+        if [[ "${CE_STATUS}" == "SUCCESS" ]];then
+          wait_for_success=false
+        fi
+        sleep 5
+      done
+    - >-
+      export ANALYSIS_ID="$(curl -su ${SONAR_TOKEN}: "${SONAR_HOST_URL}/api/ce/task?id=${CE_TASK_ID}" | jq -r .task.analysisId)"
+    - >-
+      export TASK_STATUS="$(curl -su ${SONAR_TOKEN}: "${SONAR_HOST_URL}/api/qualitygates/project_status?analysisId=${ANALYSIS_ID}" | jq -r .projectStatus.status)"
+    - |
+      if [[ "${TASK_STATUS}" == "OK" ]];then
+        echo "Success: Quality Gate status for Task '${CE_TASK_ID}' is ${TASK_STATUS}" && exit 0
+      else
+        echo "failed: Quality Gate status for Task '${CE_TASK_ID}' is ${TASK_STATUS}" && exit 1
+      fi
+  after_script:
+    - *snippet_gitlab_badge
+
+.job-test-coverage-sonar-dotnet:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  services:
+    - docker:25.0.5-dind
+  variables:
+    SONAR_HOST_URL: $TOOLING_SONAR_HOST
+    SONAR_TOKEN: $TOOLING_SONAR_TOKEN
+    SONAR_EXCLUSIONS: "**/devops/**"
+    JOB_SCRIPT_PATH: "undefined.sh"
+  script:
+    - *snippet_print_ci_vars
+    - "# --- find base image -------------------------------------------------"
+    - export DOTNET_IMAGE=$(awk '/^FROM/ {print $2; exit}' ./Dockerfile)
+    - if [[ $DOTNET_IMAGE == *AS* ]]; then DOTNET_IMAGE=$(echo $DOTNET_IMAGE | cut -d ' ' -f1); fi
+    - docker pull $DOTNET_IMAGE
+    - |
+      if [[ $DOTNET_IMAGE == *8.* ]]; then
+        if [[ $DOTNET_IMAGE == *alpine* ]]; then
+          export EXTRA_PACKAGES="dotnet tool install --global dotnet-sonarscanner --version 6.2.0 && dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.2.2 && apk add --no-cache --no-progress openjdk17 gettext nodejs npm"
+          export OS_EXEC=sh
+        else
+          export EXTRA_PACKAGES="dotnet tool install --global dotnet-sonarscanner --version 6.2.0 && dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.2.2 && apt-get update && apt-get -qq install -y gettext openjdk-17-jdk nodejs npm"
+          export OS_EXEC=bash
+        fi
+      else
+        if [[ $DOTNET_IMAGE == *alpine* ]]; then
+          export EXTRA_PACKAGES="dotnet tool install --global dotnet-sonarscanner --version 6.2.0 && dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.2.2 && apk add --no-cache --no-progress openjdk11 gettext nodejs npm"
+          export OS_EXEC=sh
+        else
+          export EXTRA_PACKAGES="dotnet tool install --global dotnet-sonarscanner --version 5.5.3 && dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.1.5 && apt-get update && apt-get -qq install -y gettext openjdk-11-jdk nodejs npm"
+          export OS_EXEC=bash
+        fi
+      fi
+    - "# --- run script ------------------------------------------------------"
+    - docker run
+      --volume /var/run/docker.sock:/var/run/docker.sock
+      --volume "$PWD":/app
+      -e BOT_GITLAB_USERNAME=$BOT_GITLAB_USERNAME
+      -e BOT_GITLAB_TOKEN=$BOT_GITLAB_TOKEN
+      -e CI_PROJECT_DIR="/app"
+      -e CI_PROJECT_NAME=$CI_PROJECT_NAME
+      -e SONAR_HOST_URL=$SONAR_HOST_URL
+      -e SONAR_TOKEN=$SONAR_TOKEN
+      -e CI_COMMIT_REF_SLUG=$CI_COMMIT_REF_SLUG
+      -e CICD_VAR_PATTERN=$CICD_VAR_PATTERN
+      --name dotnet-sonar $DOTNET_IMAGE /bin/$OS_EXEC -c "export PATH=\"$PATH:/root/.dotnet/tools\" && $EXTRA_PACKAGES && chmod +x /app/$JOB_SCRIPT_PATH && $OS_EXEC /app/$JOB_SCRIPT_PATH"
+    - ""
+  after_script:
+    - *snippet_gitlab_badge
+
+.job-test-lint-go:
+  image: docker.io/golangci/golangci-lint:v1.54.1-alpine
+  variables:
+    JOB_CI_LINT_BRANCH: master
+    JOB_CI_GO_MODULES: "on"
+  script:
+    - *snippet_print_ci_vars
+    - "# --- install dependencies --------------------------------------------"
+    - apk --no-cache add curl jq
+    - printf "machine gitlab.connectwisedev.com login $BOT_GITLAB_USERNAME password $BOT_GITLAB_TOKEN" >> ~/.netrc
+    - golangci-lint --version
+    - "[ -e .golangci.yml ] || cp /golangci/.golangci.yml ."
+    # - '# --- download .golangci.yml ------------------------------------------'
+    # - curl --request GET --header "PRIVATE-TOKEN:$BOT_GITLAB_TOKEN" -s "$CI_API_V4_URL/projects/2129/repository/files/.golangci.yml/raw?ref=$JOB_CI_LINT_BRANCH" -o .golangci.yml # project Id and branch are constant
+    - export GO111MODULE=${JOB_CI_GO_MODULES}
+    - export GOMOD_DIR=$(find $(pwd) -type f -name 'go.mod' | sed -r 's|/[^/]+$||' | grep -v "devops")
+    - |
+      if [[ ${GOMOD_DIR} == $(pwd) ]];then
+        go mod tidy
+        golangci-lint run -c .golangci.yml --out-format code-climate | tee go-lint-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+      else
+        cd ${GOMOD_DIR} && go mod tidy
+        golangci-lint run -c ../.golangci.yml --out-format code-climate | tee go-lint-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+      fi
+    - ""
+  artifacts:
+    reports:
+      codequality: go-lint-report.json
+    paths:
+      - go-lint-report.json
+
+.job-test-lint-nodejs:
+  image: node:14-alpine3.15
+  variables:
+    JOB_NPM_REGISTRY: https://artifactory.connectwisedev.com/artifactory/api/npm/pf-npm/
+  script:
+    - *snippet_print_ci_vars
+    - "# --- npm config ------------------------------------------------------"
+    - npm config set registry ${JOB_NPM_REGISTRY} --global
+    - echo -n "_auth = ${ARTIFACTORY_NPM_TOKEN}" >> ~/.npmrc
+    - "# --- install dependencies --------------------------------------------"
+    - npm i eslint
+    - ./node_modules/.bin/eslint . -f json -o js-lint-report.json
+    - node -p "require('./node_modules/eslint/lib/cli-engine/formatters/unix.js')(require('./js-lint-report.json'))"
+    - ""
+  artifacts:
+    reports:
+      codequality: js-lint-report.json
+    paths:
+      - js-lint-report.json
+
+.job-test-versioning:
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables -----------------------------------------------------"
+    - export JOB_TEST_TYPE=$([ $CI_COMMIT_REF_SLUG == hotfix-* ] && echo "patch" || echo "major or minor")
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- bump versioning ---------------------------------------------------"
+    - |
+      curl --request GET --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" -s "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/tags/v$STACK_VERSION_RELEASE"
+      tagMessage="$(curl --request GET --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" -s "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/tags/v$STACK_VERSION_RELEASE" | jq -r .message)"
+      echo "${tagMessage}"
+      if [ "$tagMessage" != "404 Tag Not Found" ]; then
+        echo "failed: version ${STACK_VERSION_RELEASE} exists; increment '${JOB_TEST_TYPE}' version in ${STACK_VERSION_FILE} file"
+        exit 1
+      else
+        echo "success"
+      fi
+
+.job-test-codequality:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  variables:
+    CICD_IMG_CODE_QUALITY: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_CODEQUALITY_TAG
+  services:
+    - docker:25.0.5-dind
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - convert_docker_secrets -i /root/.docker/custom-config.json -o /tmp/temp-docker-config/config.json
+    - "# --- run analyzer ----------------------------------------------------"
+    - docker pull --quiet "$CICD_IMG_CODE_QUALITY"
+    - docker run
+      --env SOURCE_CODE="$PWD"
+      --volume "$PWD":/code
+      --volume /var/run/docker.sock:/var/run/docker.sock
+      --volume /tmp/temp-docker-config:/root/.docker
+      "$CICD_IMG_CODE_QUALITY" /code
+    - rm -f /tmp/temp-docker-config/config.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    expire_in: 4 weeks
+
+.job-test-container:
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_CONTAINERSCAN_TAG
+  variables:
+    JOB_DOCKER_IMAGE_NAME: app
+  script:
+    - "# --- install dependencies --------------------------------------------"
+    - sudo apt-get update && sudo apt-get install -y unzip curl
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - unzip -qq awscliv2.zip
+    - sudo ./aws/install
+    - ""
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - export DOCKER_USER=AWS
+    - export DOCKER_PASSWORD=$(aws ecr get-login-password)
+    - export CI_APPLICATION_REPOSITORY=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/ecr/repository/$JOB_DOCKER_IMAGE_NAME/full-name --query 'Parameter.Value' --output text)
+    - export CI_APPLICATION_TAG=sha-$CI_COMMIT_SHA
+    - trivy image --output gl-container-scanning-report-table $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report-table
+    expire_in: 4 weeks
+
+.job-test-snyk-container:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-snyk:v1
+  extends: .job-build-docker
+  variables:
+    JOB_DOCKER_IMAGE_NAME: app
+    SNYK_API_TOKEN: $SNYK_API_TOKEN
+    SNYK_ORGANIZATION: $SNYK_ORGANIZATION
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - export DOCKER_USER=AWS
+    - export DOCKER_PASSWORD=$(aws ecr get-login-password)
+    - export CI_APPLICATION_REPOSITORY=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/ecr/repository/$JOB_DOCKER_IMAGE_NAME/full-name --query 'Parameter.Value' --output text)
+    - export CI_APPLICATION_TAG=sha-$CI_COMMIT_SHA
+    - snyk auth $SNYK_API_TOKEN
+    - snyk container test $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG --username=$DOCKER_USER --password=$DOCKER_PASSWORD --file=$JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE --json --severity-threshold=high | snyk-to-html -o snyk_results.html
+    - ""
+  artifacts:
+    when: always
+    paths:
+      - snyk_results.html
+
+.job-test-dast-api:
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERDAST_TAG
+  allow_failure: true
+  variables:
+    JOB_API_HOST: ""
+    JOB_API_PROTOCOL: https
+    JOB_API_SPEC_PATH: api/swagger.yaml
+  script:
+    - *snippet_print_ci_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - ""
+    - |
+      if [[ ! -z "${JOB_SPEC_PATH}" ]]; then
+        export JOB_API_SPEC_PATH=$JOB_SPEC_PATH
+      fi
+    - |
+      if [[ -z "${JOB_API_HOST}" ]]; then
+        sed -i -E "s/https{0,1}:\/\/localhost(:[0-9]+)*/$JOB_API_PROTOCOL:\/\/$STACK_RECORD/g" $JOB_API_SPEC_PATH
+        export DAST_API_OPENAPI="${JOB_API_PROTOCOL}://${STACK_RECORD}/swagger.yaml"
+        export DAST_API_HOST_OVERRIDE=$STACK_RECORD
+      else
+        sed -i -E "s/https{0,1}:\/\/localhost(:[0-9]+)*/$JOB_API_PROTOCOL:\/\/$JOB_API_HOST/g" $JOB_API_SPEC_PATH
+        export DAST_API_OPENAPI="${JOB_API_PROTOCOL}://${JOB_API_HOST}/swagger.yaml"
+        export DAST_API_HOST_OVERRIDE=$JOB_API_HOST
+      fi
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - printenv | grep -E "DAST_" | sort
+    - mkdir -p /zap/wrk
+    - cp $JOB_API_SPEC_PATH /zap/wrk/swagger.yaml
+    - /analyze
+  artifacts:
+    reports:
+      dast: gl-dast-report.json
+
+.job-test-sca:
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSCA_TAG
+  variables:
+    ANALYZER_TARGET_DIR: $CICD_TEST_TARGET_DIR
+    DS_DEFAULT_ANALYZERS: gemnasium
+    DS_EXCLUDED_PATHS: $CICD_TEST_EXCLUDE_PATHS
+    DS_DISABLE_DIND: "true"
+  script:
+    - *snippet_print_ci_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - /analyzer run
+  artifacts:
+    reports:
+      dependency_scanning: gl-dependency-scanning-report.json
+    expire_in: 4 weeks
+
+.job-test-sca-nodejs:
+  extends:
+    - .job-test-sca
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSCANODEJS_TAG
+  variables:
+    JOB_NPM_REGISTRY: https://artifactory.connectwisedev.com/artifactory/api/npm/pf-npm/
+  script:
+    - *snippet_print_ci_vars
+    - "# --- npm config ------------------------------------------------------"
+    - npm config set registry ${JOB_NPM_REGISTRY} --global
+    - echo -n "_auth = ${ARTIFACTORY_NPM_TOKEN}" >> ~/.npmrc
+    - "# --- run analyzer ----------------------------------------------------"
+    - npm install
+    - /analyzer run
+    - rm -f ~/.npmrc
+
+.job-test-sca-python:
+  extends:
+    - .job-test-sca
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSCAPYTHON_TAG
+  variables:
+    DS_DEFAULT_ANALYZERS: gemnasium-python
+
+.job-test-sca-snyk-go:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-snyk:v1-go
+  variables:
+    SNYK_API_TOKEN: $SNYK_API_TOKEN
+    SNYK_ORGANIZATION: $SNYK_ORGANIZATION
+  script:
+    - *snippet_set_shared_vars
+    - printf "machine gitlab.connectwisedev.com login $BOT_GITLAB_USERNAME password $BOT_GITLAB_TOKEN" >> ~/.netrc
+    - export GOMOD_DIR=$(find $(pwd) -type f -name 'go.mod' | sed -r 's|/[^/]+$||' | grep -v "devops")
+    - snyk auth $SNYK_API_TOKEN
+    - |
+      if [[ $(echo "$GOMOD_DIR" | wc -l) -gt 1 ]]; then
+        declare -a JSON_RESULTS=()
+        for dir in $GOMOD_DIR; do
+          snyk test --file=${dir}/go.mod --json --severity-threshold=high | snyk-to-html -o snyk_results_$(basename "$dir").html
+        done
+      else
+        snyk test --file=${GOMOD_DIR}/go.mod --json --severity-threshold=high | snyk-to-html -o snyk_results.html
+      fi
+    - ""
+  artifacts:
+    when: always
+    paths:
+      - snyk_results*.html
+
+.job-test-sca-snyk-dotnet:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-snyk:v1-dotnet
+  variables:
+    SNYK_API_TOKEN: $SNYK_API_TOKEN
+    SNYK_ORGANIZATION: $SNYK_ORGANIZATION
+    JOB_DOTNET_SLN_FILE_PATH: "."
+  script:
+    - *snippet_set_shared_vars
+    - echo $JOB_DOTNET_SLN_FILE_PATH
+    - dotnet restore $JOB_DOTNET_SLN_FILE_PATH
+    - snyk auth $SNYK_API_TOKEN
+    - snyk test --all-projects --json --severity-threshold=high | snyk-to-html -o snyk_results.html
+    - ""
+  artifacts:
+    when: always
+    paths:
+      - snyk_results.html
+
+.job-test-sca-snyk-python:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-snyk:v1-python
+  variables:
+    SNYK_API_TOKEN: $SNYK_API_TOKEN
+    SNYK_ORGANIZATION: $SNYK_ORGANIZATION
+    JOB_PYTHON_REQ_FILE_PATH: "requirements.txt"
+  script:
+    - |
+      if [[ ! -s "${JOB_PYTHON_REQ_FILE_PATH}" ]]; then
+        exit 0
+      fi
+    - pip install -r ${JOB_PYTHON_REQ_FILE_PATH}
+    - snyk auth $SNYK_API_TOKEN
+    - snyk test --all-projects --json --severity-threshold=high | snyk-to-html -o snyk_results.html
+    - ""
+  artifacts:
+    when: always
+    paths:
+      - snyk_results.html
+
+.job-test-sca-snyk-nodejs:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-snyk:v1
+  variables:
+    SNYK_API_TOKEN: $SNYK_API_TOKEN
+    SNYK_ORGANIZATION: $SNYK_ORGANIZATION
+  script:
+    - snyk auth $SNYK_API_TOKEN
+    - snyk test --all-projects --json --severity-threshold=high | snyk-to-html -o snyk_results.html
+    - ""
+  artifacts:
+    when: always
+    paths:
+      - snyk_results.html
+
+.job-test-license:
+  image:
+    name: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERLICENSE_TAG
+    entrypoint: [""]
+  variables:
+    ANALYZER_TARGET_DIR: $CICD_TEST_TARGET_DIR
+    LM_REPORT_VERSION: "2.1"
+  timeout: 10m
+  script:
+    - *snippet_print_ci_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - printf "machine gitlab.connectwisedev.com\nlogin $BOT_GITLAB_USERNAME\npassword $BOT_GITLAB_TOKEN" >> ~/.netrc
+    - /run.sh analyze .
+  artifacts:
+    reports:
+      license_scanning: gl-license-scanning-report.json
+    expire_in: 4 weeks
+
+.job-test-sast-base:
+  variables:
+    ANALYZER_TARGET_DIR: $CICD_TEST_TARGET_DIR
+    SAST_DISABLE_DIND: "true"
+    SAST_EXCLUDED_PATHS: $CICD_TEST_EXCLUDE_PATHS
+    SEARCH_MAX_DEPTH: 5
+  allow_failure: true
+  script:
+    - *snippet_print_ci_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - printf "machine gitlab.connectwisedev.com\nlogin $BOT_GITLAB_USERNAME\npassword $BOT_GITLAB_TOKEN" >> ~/.netrc
+    - /analyzer run
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
+    expire_in: 4 weeks
+
+.job-test-sast-go:
+  extends:
+    - .job-test-sast-base
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSASTGO_TAG
+
+.job-test-sast-dotnet:
+  extends:
+    - .job-test-sast-base
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSASTDOTNET_TAG
+
+.job-test-sast-nodejs:
+  extends:
+    - .job-test-sast-base
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSASTNODEJS_TAG
+
+.job-test-sast-python:
+  extends:
+    - .job-test-sast-base
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSASTPYTHON_TAG
+
+.job-test-sast-snyk:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-snyk:v1
+  variables:
+    SNYK_API_TOKEN: $SNYK_API_TOKEN
+    SNYK_ORGANIZATION: $SNYK_ORGANIZATION
+  script:
+    - snyk auth $SNYK_API_TOKEN
+    - snyk code test --json --severity-threshold=high | snyk-to-html -o snyk_results.html
+    # - |
+    #   [[ $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH  == "hotfix-"* || $CI_COMMIT_BRANCH  == "release-"* ]] && snyk code test --report --project-name="${CI_PROJECT_NAME}" --org=${SNYK_ORGANIZATION}
+    - ""
+  artifacts:
+    when: always
+    paths:
+      - snyk_results.html
+
+.job-test-secrets:
+  image: $GITLAB_IMAGES_BASE_ECR_REPO:$GITLAB_IMAGE_ANALYZERSECRETS_TAG
+  timeout: 5m
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_shared_vars
+    - "# --- run analyzer ----------------------------------------------------"
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        git fetch origin $CI_DEFAULT_BRANCH $CI_BUILD_REF_NAME
+        export SECRET_DETECTION_COMMIT_TO=$(git log --left-right --cherry-pick --pretty=format:"%H" refs/remotes/origin/$CI_DEFAULT_BRANCH...refs/remotes/origin/$CI_BUILD_REF_NAME | tail -n 1)
+        export SECRET_DETECTION_COMMIT_FROM=$CI_COMMIT_SHA
+      fi
+    - /analyzer run
+  artifacts:
+    reports:
+      secret_detection: gl-secret-detection-report.json
+    expire_in: 4 weeks
+
+.job-build-docker:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  services:
+    - docker:25.0.5-dind
+  variables:
+    DOCKER_BUILDKIT: 1
+    JOB_DOCKER_BUILD_CONTEXT: .
+    JOB_DOCKER_BUILD_EXTRA_ARGS: ""
+    JOB_DOCKER_BUILD_FILE: Dockerfile
+    JOB_DOCKER_IMAGE_NAME: app
+    JOB_TEST_COVERAGE_REPORT_FILENAME: "coverage.out"
+    JOB_TEST_JUNIT_REPORT_FILENAME: "report.xml"
+
+.job-build-docker-dist:
+  extends: .job-build-docker
+  artifacts:
+    reports:
+      junit: report.xml
+    paths:
+      - dist/
+    expire_in: 1 week
+  variables:
+    JOB_ARTIFACT_REPO_URL: https://artifactory.connectwisedev.com
+    JOB_DIST_LANGUAGE: notset
+    JOB_DIST_FILE_PATH: notset
+    JOB_ARTIFACT_REPO_HOST: artifactory.connectwisedev.com
+    JOB_ARTIFACT_REPO_USER: $STACK_SERVICE_NAME
+    JOB_ARTIFACT_REPO_PASS: $ARTIFACTORY_DEPLOYER_SECRET
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- check for required env ------------------------------------------"
+    - if [[ "$JOB_DIST_LANGUAGE" == "notset" ]]; then echo "Missing ENV JOB_DIST_LANGUAGE"; exit 1; fi
+    - ""
+    - "# --- set variables ---------------------------------------------------"
+    - export JOB_IMAGE_NAME="local"
+    - |
+      if [[ -z $JOB_ARTIFACT_REPO_PASS ]]; then
+        export NETRC_LOCAL=machine\ gitlab.connectwisedev.com\\nlogin\ $BOT_GITLAB_USERNAME\\npassword\ $BOT_GITLAB_TOKEN
+      else
+        export NETRC_LOCAL=machine\ gitlab.connectwisedev.com\\nlogin\ $BOT_GITLAB_USERNAME\\npassword\ $BOT_GITLAB_TOKEN\\nmachine\ $JOB_ARTIFACT_REPO_HOST\\nlogin\ $JOB_ARTIFACT_REPO_USER\\npassword\ $JOB_ARTIFACT_REPO_PASS
+      fi
+    - ""
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - "# --- build test ------------------------------------------------------"
+    - >
+      docker build -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --build-arg NETRC_LOCAL
+      --build-arg VERSION_BUILD=$STACK_VERSION_BUILD
+      --build-arg VERSION_RELEASE=$STACK_VERSION_RELEASE
+      --build-arg VERSION_SHA=$CI_COMMIT_SHA
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      --target test
+      -t $JOB_IMAGE_NAME:test-$CI_COMMIT_REF_SLUG
+      $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- retrieve test coverage ------------------------------------------"
+    - |
+      if [[ ! -z $JOB_TEST_COVERAGE_REPORT_FILENAME ]]; then
+        TEST_CONTAINER_NAME=test-$CI_COMMIT_SHA
+        docker create --name $TEST_CONTAINER_NAME $JOB_IMAGE_NAME:test-$CI_COMMIT_REF_SLUG
+        docker cp $TEST_CONTAINER_NAME:/tmp/$JOB_TEST_COVERAGE_REPORT_FILENAME ./$JOB_TEST_COVERAGE_REPORT_FILENAME || true
+        docker cp $TEST_CONTAINER_NAME:/tmp/$JOB_TEST_JUNIT_REPORT_FILENAME ./$JOB_TEST_JUNIT_REPORT_FILENAME || true
+        docker rm $TEST_CONTAINER_NAME
+      fi
+    - ""
+    - "# --- build distributable ---------------------------------------------"
+    - >
+      docker build -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --build-arg NETRC_LOCAL
+      --build-arg VERSION_BUILD=$STACK_VERSION_BUILD
+      --build-arg VERSION_RELEASE=$STACK_VERSION_RELEASE
+      --build-arg VERSION_SHA=$CI_COMMIT_SHA
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      --target dist
+      -t $JOB_IMAGE_NAME:dist-$CI_COMMIT_REF_SLUG
+      $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- retrieve distributable ------------------------------------------"
+    - |
+      if [[ ! "$JOB_DIST_FILE_PATH" == "notset" ]]; then
+        DIST_CONTAINER_NAME=dist-$CI_COMMIT_SHA
+        docker create --name $DIST_CONTAINER_NAME $JOB_IMAGE_NAME:dist-$CI_COMMIT_REF_SLUG
+        docker cp $DIST_CONTAINER_NAME:$JOB_DIST_FILE_PATH ./dist/
+        docker rm $DIST_CONTAINER_NAME
+      fi
+    - ""
+    - *snippet_publish_dotnet_dist
+    - *snippet_publish_golang_dist
+    - *snippet_publish_nodejs_dist
+    - *snippet_publish_python_dist
+    - echo "ERROR Unable to detect language"
+    - exit 1
+
+.job-build-docker-image:
+  extends: .job-build-docker
+  artifacts:
+    paths:
+      - $JOB_TEST_COVERAGE_REPORT_FILENAME
+      - coverage.cobertura.xml
+    expire_in: 1 week
+  variables:
+    JOB_ARTIFACT_REPO_HOST: artifactory.connectwisedev.com
+    JOB_ARTIFACT_REPO_USER: $STACK_SERVICE_NAME
+    JOB_ARTIFACT_REPO_PASS: $ARTIFACTORY_DEPLOYER_SECRET
+  coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - export JOB_ECR_REPO=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/ecr/repository/$JOB_DOCKER_IMAGE_NAME/full-name --query 'Parameter.Value' --output text)
+    - |
+      if [[ -z $JOB_ARTIFACT_REPO_PASS ]]; then
+        export NETRC_LOCAL=machine\ gitlab.connectwisedev.com\ login\ $BOT_GITLAB_USERNAME\ password\ $BOT_GITLAB_TOKEN
+      else
+        export NETRC_LOCAL=machine\ gitlab.connectwisedev.com\\nlogin\ $BOT_GITLAB_USERNAME\\npassword\ $BOT_GITLAB_TOKEN\\nmachine\ $JOB_ARTIFACT_REPO_HOST\\nlogin\ $JOB_ARTIFACT_REPO_USER\\npassword\ $JOB_ARTIFACT_REPO_PASS
+      fi
+    - ""
+    - |
+      if [[ -z $JOB_DOCKER_BUILD_MULTIPLATFORM ]]; then
+        export JOB_DOCKER_ARG=build
+        export JOB_DOCKER_BUILD_PLATFORM=linux/amd64
+      else
+        export JOB_DOCKER_ARG="buildx build"
+        export JOB_DOCKER_BUILD_PLATFORM=linux/arm64,linux/amd64
+        docker buildx create --name multi-arch --driver=docker-container --use --bootstrap
+        export JOB_DOCKER_BUILDX_EXTRA_ARGS_TEST="--output type=image,push=false --provenance=false"
+        export JOB_DOCKER_BUILDX_EXTRA_ARGS="--output type=image,push=true --provenance=false"
+      fi
+    - ""
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- build test ------------------------------------------------------"
+    - >
+      docker $JOB_DOCKER_ARG -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --build-arg NETRC_LOCAL
+      --build-arg VERSION_BUILD=$STACK_VERSION_BUILD
+      --build-arg VERSION_RELEASE=$STACK_VERSION_RELEASE
+      --build-arg VERSION_SHA=$CI_COMMIT_SHA
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      --target test
+      --platform $JOB_DOCKER_BUILD_PLATFORM
+      $(echo $JOB_DOCKER_BUILDX_EXTRA_ARGS_TEST)
+      -t $JOB_ECR_REPO:test-$CI_COMMIT_REF_SLUG
+      $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- retrieve test coverage -------------------------------------------"
+    - |
+      if [[ ! -z $JOB_TEST_COVERAGE_REPORT_FILENAME ]]; then
+        TEST_CONTAINER_NAME=test-$CI_COMMIT_SHA
+        docker create --name $TEST_CONTAINER_NAME $JOB_ECR_REPO:test-$CI_COMMIT_REF_SLUG
+        docker cp $TEST_CONTAINER_NAME:/tmp/$JOB_TEST_COVERAGE_REPORT_FILENAME ./$JOB_TEST_COVERAGE_REPORT_FILENAME || true
+        docker rm $TEST_CONTAINER_NAME
+      fi
+    - ""
+    - "# --- build release ---------------------------------------------------"
+    - >
+      docker $JOB_DOCKER_ARG -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --build-arg NETRC_LOCAL
+      --build-arg VERSION_BUILD=$STACK_VERSION_BUILD
+      --build-arg VERSION_RELEASE=$STACK_VERSION_RELEASE
+      --build-arg VERSION_SHA=$CI_COMMIT_SHA
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      --platform $JOB_DOCKER_BUILD_PLATFORM
+      $(echo $JOB_DOCKER_BUILDX_EXTRA_ARGS)
+      -t $JOB_ECR_REPO:branch-$CI_COMMIT_REF_SLUG
+      -t $JOB_ECR_REPO:sha-$CI_COMMIT_SHA
+      -t $JOB_ECR_REPO:build-$STACK_VERSION_BUILD
+      $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- publish image ---------------------------------------------------"
+    - |
+      if [[ -z $JOB_DOCKER_BUILD_MULTIPLATFORM ]]; then
+        docker push $JOB_ECR_REPO:branch-$CI_COMMIT_REF_SLUG
+        docker push $JOB_ECR_REPO:sha-$CI_COMMIT_SHA
+        docker push $JOB_ECR_REPO:build-$STACK_VERSION_BUILD
+      else
+        echo "docker buildx has already published the images"
+      fi
+    - ""
+
+.job-build-zip-package:
+  variables:
+    JOB_DESTINATION_PREFIX: ""
+    JOB_PACKAGE_NAME: artifacts.zip
+    JOB_SOURCE_DIR: .
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- publish package -------------------------------------------------"
+    - cd $JOB_SOURCE_DIR
+    - zip -r $JOB_PACKAGE_NAME .
+    - aws s3 cp $JOB_PACKAGE_NAME s3://$CORE_STACK_ARTIFACT_S3_BUCKET/builds/$CI_COMMIT_SHA/${JOB_DESTINATION_PREFIX}${JOB_PACKAGE_NAME}
+    - ""
+
+.job-release-build:
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        if [[ "$STACK_VERSION_FILE" == "pyproject.toml" || "$STACK_VERSION_FILE" == "setup.cfg" || "$STACK_VERSION_FILE" == "setup.cfg" || "$STACK_VERSION_FILE" == *"__init__.py"* ]]; then
+          # default to patch for python
+          export JOB_BUMP_TYPE="patch"
+        else
+          # default to minor for everything else
+          export JOB_BUMP_TYPE="minor"
+        fi
+      elif [ "$CI_COMMIT_BRANCH" = "release-*" ]; then
+        export JOB_BUMP_TYPE="patch"
+      else
+        export JOB_BUMP_TYPE="none"
+      fi
+    - export JOB_RELEASE_TAG=v$STACK_VERSION_RELEASE
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- tag commit with version -----------------------------------------"
+    - >-
+      statusCode=$(curl -o /tmp/tagresult -w '%{http_code}\n' --request POST --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/tags?tag_name=$JOB_RELEASE_TAG&ref=$CI_COMMIT_SHA")
+
+      if [[ $statusCode != 201 ]]; then
+        echo "tag commit failed: $(cat /tmp/tagresult)"
+        exit 1
+      fi
+
+    - "# --- add bump versioning ---------------------------------------------"
+    - |
+
+
+      if [[ "$JOB_BUMP_TYPE" == "none" ]]; then
+        echo "no automated version bump for this branch"
+      else
+        export JOB_COMMIT_ID=$(git rev-parse HEAD)
+        export JOB_VERSION_RELEASE_BUMPED=$(semver bump $JOB_BUMP_TYPE $STACK_VERSION_RELEASE)
+        if [ "$STACK_VERSION_FILE" == ".version" ]; then
+          content="$JOB_VERSION_RELEASE_BUMPED"
+        else
+          if [[ "$STACK_VERSION_FILE" == *"__init__.py"* ]]; then
+            sedCmd="s/__version__.*=.*/__version__ = '$JOB_VERSION_RELEASE_BUMPED'/g"
+          elif [ "$STACK_VERSION_FILE" == "setup.py" ]; then
+            sedCmd="s/version.*=.*,/version='$JOB_VERSION_RELEASE_BUMPED',/g"
+          elif [ "$STACK_VERSION_FILE" == "setup.cfg" ]; then
+            sedCmd="s/version.*=.*/version = $JOB_VERSION_RELEASE_BUMPED/g"
+          else
+            sedCmd="s/version.*=.*/version = \"$JOB_VERSION_RELEASE_BUMPED\"/g"
+          fi
+          sed -i -E "$sedCmd" "$STACK_VERSION_FILE"
+          content=$(cat "$STACK_VERSION_FILE")
+        fi
+
+        printenv | grep -E "^(JOB_)" | sort
+        curl --request POST --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" \
+        --form "branch=$CI_COMMIT_BRANCH" \
+        --form "commit_message=automated version bump" \
+        --form "actions[][action]=update" \
+        --form "actions[][file_path]=$STACK_VERSION_FILE" \
+        --form "actions[][content]=$content" \
+        "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits"
+      fi
+    - ""
+
+.job-publish-artifact-docker:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  services:
+    - docker:25.0.5-dind
+  variables:
+    JOB_DOCKER_IMAGE_NAME: app
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - export JOB_RELEASE_TAG=$CI_COMMIT_TAG
+    - export JOB_RELEASE_COMMIT_ID=$(git rev-parse $JOB_RELEASE_TAG)
+    - export JOB_IMAGE_SHA_TAG=sha-$JOB_RELEASE_COMMIT_ID
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- publish image nonprod -------------------------------------------"
+    - export JOB_ECR_REPO_SRC=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/ecr/repository/$JOB_DOCKER_IMAGE_NAME/full-name --query 'Parameter.Value' --output text --region us-east-1)
+    - |
+      if [[ -z $JOB_DOCKER_BUILD_MULTIPLATFORM ]]; then
+        docker pull $JOB_ECR_REPO_SRC:$JOB_IMAGE_SHA_TAG
+        docker tag $JOB_ECR_REPO_SRC:$JOB_IMAGE_SHA_TAG $JOB_ECR_REPO_SRC:$JOB_RELEASE_TAG
+        docker push $JOB_ECR_REPO_SRC:$JOB_RELEASE_TAG
+      else
+        docker buildx imagetools create -t $JOB_ECR_REPO_SRC:$JOB_RELEASE_TAG $JOB_ECR_REPO_SRC:$JOB_IMAGE_SHA_TAG
+      fi
+    - ""
+    - "# --- publish image prod ----------------------------------------------"
+    - *snippet_set_aws_config    
+    - export AWS_ACCESS_KEY_ID=${ARTIFACT_AWS_ACCESS_KEY_ID:-$PROD_AWS_ACCESS_KEY_ID}
+    - export AWS_SECRET_ACCESS_KEY=${ARTIFACT_AWS_SECRET_ACCESS_KEY:-$PROD_AWS_SECRET_ACCESS_KEY}
+    - *snippet_print_deployer_info
+    - export JOB_ECR_REPO_DST=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/ecr/repository/$JOB_DOCKER_IMAGE_NAME/full-name --query 'Parameter.Value' --output text)
+    - ""
+    - |
+      if [[ -z $JOB_DOCKER_BUILD_MULTIPLATFORM ]]; then
+        docker tag $JOB_ECR_REPO_SRC:$JOB_RELEASE_TAG $JOB_ECR_REPO_DST:$JOB_RELEASE_TAG
+        docker push $JOB_ECR_REPO_DST:$JOB_RELEASE_TAG
+      else
+        rm ~/.docker/config.json
+        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin $(echo $JOB_ECR_REPO_DST | awk -F '/' '{print $1}')
+        export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
+        export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
+        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin $(echo $JOB_ECR_REPO_SRC | awk -F '/' '{print $1}')
+        docker buildx imagetools create -t $JOB_ECR_REPO_DST:$JOB_RELEASE_TAG $JOB_ECR_REPO_SRC:$JOB_RELEASE_TAG
+      fi
+    - ""
+    - "# --- apply major version tag ----------------------------------------"
+    - |
+      if [[ "$CICD_JOB_FRIENDLY_MAJOR_TAG" == "enabled" ]]; then
+        JOB_ECR_REPO_NAME=$(echo $JOB_ECR_REPO_DST | awk -F '.com/' '{print $2}')
+        MAJOR_VERSION=$(cat .version | awk -F '.' '{print $1}')
+        MAJOR_VERSION_TAG="v${MAJOR_VERSION}"
+        echo "Applying ${MAJOR_VERSION_TAG} in ${JOB_ECR_REPO_NAME}"
+        MANIFEST=$(aws ecr batch-get-image --repository-name $JOB_ECR_REPO_NAME --image-ids imageTag=$JOB_RELEASE_TAG --query 'images[].imageManifest' --output text)
+        aws ecr put-image --repository-name $JOB_ECR_REPO_NAME --image-tag $MAJOR_VERSION_TAG --image-manifest "$MANIFEST"
+      else
+        echo "Skipping application of MAJOR version tag"
+      fi
+    - "# --- apply minor version tag ----------------------------------------"
+    - |
+      if [[ "$CICD_JOB_FRIENDLY_MINOR_TAG" == "enabled" ]]; then
+        JOB_ECR_REPO_NAME=$(echo $JOB_ECR_REPO_DST | awk -F '.com/' '{print $2}')
+        MAJOR_VERSION=$(cat .version | awk -F '.' '{print $1}')
+        MINOR_VERSION=$(cat .version | awk -F '.' '{print $2}')
+        MINOR_VERSION_TAG="v${MAJOR_VERSION}.${MINOR_VERSION}"
+        echo "Applying ${MINOR_VERSION_TAG} in ${JOB_ECR_REPO_NAME}"
+        MANIFEST=$(aws ecr batch-get-image --repository-name $JOB_ECR_REPO_NAME --image-ids imageTag=$JOB_RELEASE_TAG --query 'images[].imageManifest' --output text)
+        aws ecr put-image --repository-name $JOB_ECR_REPO_NAME --image-tag $MINOR_VERSION_TAG --image-manifest "$MANIFEST"
+      else
+        echo "Skipping application of MINOR version tag"
+      fi
+    - ""
+
+.job-publish-dist-zips:
+  variables:
+    JOB_PACKAGE_FILE_NAME: "package.zip"
+    JOB_DOCKER_BUILD_CONTEXT: "."
+    JOB_DOCKER_BUILD_FILE: Dockerfile
+    JOB_DOCKER_BUILD_EXTRA_ARGS: ""
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_aws_config
+    - *snippet_set_shared_vars
+    - '# --- set variables ---------------------------------------------------'
+    - export JOB_SRC_S3_BUCKET_STACK=${JOB_SRC_S3_BUCKET_STACK:-$CORE_STACK_NAME}
+    - export JOB_DST_S3_BUCKET_STACK=${JOB_DST_S3_BUCKET_STACK:-$CORE_STACK_NAME}
+    - export JOB_SRC_S3_PREFIX=${JOB_SRC_S3_PREFIX:-builds/$CI_COMMIT_SHA}
+    - export JOB_DST_S3_PREFIX=${JOB_DST_S3_PREFIX:-releases/$STACK_VERSION_RELEASE}
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ''
+    - "# --- create temp -----------------------------------------------------"
+    - export TMP_LOCAL_DIR=./artifacts
+    - mkdir -p $TMP_LOCAL_DIR
+    - ''
+    - "# --- pull package ----------------------------------------------------"
+    - export JOB_SRC_S3_BUCKET=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text --region us-east-1)
+    - aws s3 cp s3://$JOB_SRC_S3_BUCKET/$JOB_SRC_S3_PREFIX/$JOB_PACKAGE_FILE_NAME ./$TMP_LOCAL_DIR/$JOB_PACKAGE_FILE_NAME
+    - ls -la ./$TMP_LOCAL_DIR/
+    - ''
+    - "# --- publish package -------------------------------------------------"
+    # download artifacts from release repo bucket
+    - export AWS_ACCESS_KEY_ID=${ARTIFACT_AWS_ACCESS_KEY_ID:-$PROD_AWS_ACCESS_KEY_ID}
+    - export AWS_SECRET_ACCESS_KEY=${ARTIFACT_AWS_SECRET_ACCESS_KEY:-$PROD_AWS_SECRET_ACCESS_KEY}
+    - export JOB_DST_S3_BUCKET=$(aws ssm get-parameter --name /$CORE_STACK_NAME/resources/s3/bucket/artifacts/name --query 'Parameter.Value' --output text --region us-east-1)
+    - aws s3 cp ./$TMP_LOCAL_DIR/$JOB_PACKAGE_FILE_NAME s3://$JOB_DST_S3_BUCKET/$JOB_DST_S3_PREFIX/$JOB_PACKAGE_FILE_NAME
+    - aws s3 ls s3://$JOB_DST_S3_BUCKET/$JOB_DST_S3_PREFIX/$JOB_PACKAGE_FILE_NAME
+    - ""
+
+.job-build-dist-blobs:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  variables:
+    JOB_SRC_LOCAL_PATH: .
+    JOB_PACKAGE_DIR_NAME: repo
+    JOB_BUILD_PROMOTION_RELEASE: 0
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_aws_config
+    - *snippet_set_shared_vars
+    - "# --- set remote dest path --------------------------------------------"
+    - |
+      if [[ ${JOB_BUILD_PROMOTION_RELEASE} -eq 0 ]] ; then
+        export JOB_DEST_REMOTE_PATH=builds/${CI_COMMIT_SHA}
+      elif [[ ${JOB_BUILD_PROMOTION_RELEASE} -eq 1 ]] ; then
+        export JOB_DEST_REMOTE_PATH=releases/${STACK_VERSION_RELEASE}
+      fi
+    - "# --- set variables ---------------------------------------------------"
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- publish package -------------------------------------------------"
+    - aws s3 sync $JOB_SRC_LOCAL_PATH s3://$CORE_STACK_ARTIFACT_S3_BUCKET/$JOB_DEST_REMOTE_PATH/$JOB_PACKAGE_DIR_NAME/ --delete
+    - ""
+
+.job-build-dist-zips:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  services:
+    - docker:25.0.5-dind
+  artifacts:
+    name: package-$CI_PIPELINE_IID
+    paths:
+      - $JOB_PACKAGE_FILE_NAME
+      - $JOB_TEST_COVERAGE_REPORT_FILENAME
+    expire_in: 1 week
+  variables:
+    JOB_DOCKER_BUILD_CONTEXT: "."
+    JOB_DOCKER_BUILD_FILE: Dockerfile
+    JOB_DOCKER_BUILD_EXTRA_ARGS: ""
+    JOB_PACKAGE_FILE_NAME: package.zip
+    JOB_TEST_COVERAGE_REPORT_FILENAME: lcov.info
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_aws_config
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - export JOB_DOCKER_IMAGE_PACKAGE=package:local
+    - export JOB_DOCKER_IMAGE_TEST=package:test
+    - export JOB_DOCKER_CONTAINER_NAME=package
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- run test --------------------------------------------------------"
+    - >-
+      docker build -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --target test
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      -t $JOB_DOCKER_IMAGE_TEST $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- build & package -------------------------------------------------"
+    - >-
+      docker build -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --target package
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      -t $JOB_DOCKER_IMAGE_PACKAGE $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- retrieve coverage -----------------------------------------------"
+    - |
+      if [[ ! -z $JOB_TEST_COVERAGE_REPORT_FILENAME ]]; then
+        docker run --name test-$JOB_DOCKER_CONTAINER_NAME $JOB_DOCKER_IMAGE_TEST /bin/true
+        docker cp test-$JOB_DOCKER_CONTAINER_NAME:/tmp/$JOB_TEST_COVERAGE_REPORT_FILENAME $JOB_TEST_COVERAGE_REPORT_FILENAME || true
+        docker rm -f test-$JOB_DOCKER_CONTAINER_NAME
+      fi
+    - ""
+    - "# --- retrieve package ------------------------------------------------"
+    - docker run --name $JOB_DOCKER_CONTAINER_NAME $JOB_DOCKER_IMAGE_PACKAGE /bin/true
+    - docker cp $JOB_DOCKER_CONTAINER_NAME:/tmp/$JOB_PACKAGE_FILE_NAME $JOB_PACKAGE_FILE_NAME
+    - docker rm -f $JOB_DOCKER_CONTAINER_NAME
+    - ""
+    - "# --- publish package -------------------------------------------------"
+    - aws s3 cp $JOB_PACKAGE_FILE_NAME s3://$CORE_STACK_ARTIFACT_S3_BUCKET/builds/$CI_COMMIT_SHA/$JOB_PACKAGE_FILE_NAME
+    - ""
+
+.job-build-dist-zips-upload:
+  extends: .job-build-docker
+  variables:
+    JOB_ARTIFACT_REPO_URL: https://artifactory.connectwisedev.com/artifactory
+    JOB_ARTIFACT_REPO_PATH: juno-ms-nonprod-local/${CI_PROJECT_NAME}
+    JOB_ARTIFACT_FILE_NAME: "package.zip"
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - export JOB_DOCKER_IMAGE_PACKAGE=package:local
+    - export JOB_DOCKER_IMAGE_NAME=package:test
+    - export JOB_DOCKER_CONTAINER_NAME=package
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - export NETRC_LOCAL="machine gitlab.connectwisedev.com login $BOT_GITLAB_USERNAME password $BOT_GITLAB_TOKEN"
+    - "# --- run test --------------------------------------------------------"
+    - >-
+      docker build -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --build-arg NETRC_LOCAL
+      --build-arg VERSION_BUILD=$STACK_VERSION_BUILD
+      --build-arg VERSION_RELEASE=$STACK_VERSION_RELEASE
+      --build-arg VERSION_SHA=$CI_COMMIT_SHA
+      --target test
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      -t $JOB_DOCKER_IMAGE_NAME $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- build & package -------------------------------------------------"
+    - >-
+      docker build -f $JOB_DOCKER_BUILD_CONTEXT/$JOB_DOCKER_BUILD_FILE
+      --build-arg NETRC_LOCAL
+      --build-arg VERSION_BUILD=$STACK_VERSION_BUILD
+      --build-arg VERSION_RELEASE=$STACK_VERSION_RELEASE
+      --build-arg VERSION_SHA=$CI_COMMIT_SHA
+      --target release
+      $(echo $JOB_DOCKER_BUILD_EXTRA_ARGS)
+      -t $JOB_DOCKER_IMAGE_PACKAGE $JOB_DOCKER_BUILD_CONTEXT
+    - ""
+    - "# --- retrieve package ------------------------------------------------"
+    - docker run --name $JOB_DOCKER_CONTAINER_NAME $JOB_DOCKER_IMAGE_PACKAGE /bin/true
+    - docker cp $JOB_DOCKER_CONTAINER_NAME:/tmp/${JOB_ARTIFACT_FILE_NAME} ${JOB_ARTIFACT_FILE_NAME}
+    - docker rm -f $JOB_DOCKER_CONTAINER_NAME
+    - ""
+    - "# --- publish package -------------------------------------------------"
+    - echo "fetching checksum for artifact"
+    - SHA_256=$(openssl dgst -sha256 ${JOB_ARTIFACT_FILE_NAME} |sed 's/^[SHA256|SHA2-256].*= //')
+    - SHA1=$(openssl dgst -sha1 ${JOB_ARTIFACT_FILE_NAME} |sed 's/^SHA.*= //')
+    - ""
+    - curl -sSf -X PUT
+      -u "${JOB_ARTIFACT_REPO_USER}:${JOB_ARTIFACT_REPO_PASS}"
+      -H "X-Checksum-Sha256:${SHA_256}"
+      -H "X-Checksum-Sha1:${SHA1}"
+      -T "${JOB_ARTIFACT_FILE_NAME}"
+      "${JOB_ARTIFACT_REPO_URL}/${JOB_ARTIFACT_REPO_PATH}/${STACK_VERSION_BUILD}/${JOB_ARTIFACT_FILE_NAME};build.name=${CI_PROJECT_NAME};build.number=${STACK_VERSION_BUILD}"
+    - ""
+    - export DATE_ISO=$(date +"%Y-%m-%dT%H:%M:%S.%3SZ")
+    - curl -sSf -X PUT
+      -u "${JOB_ARTIFACT_REPO_USER}:${JOB_ARTIFACT_REPO_PASS}"
+      -H "Content-Type:application/json"
+      -d '{"version":"'"${STACK_VERSION_RELEASE}"'","name":"'"${CI_PROJECT_NAME}"'","number":"'"${STACK_VERSION_BUILD}"'","started":"'"${DATE_ISO}"'","modules":[{"id":"'"${CI_PROJECT_NAME}"'","artifacts":[{"type":"zip","sha1":"'"${SHA1}"'","sha256":"'"${SHA_256}"'","name":"'"${JOB_ARTIFACT_FILE_NAME}"'"}]}]}' ${JOB_ARTIFACT_REPO_URL}/api/build
+    - ""
+
+.job-publish-artifact-zip:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+  variables:
+    JOB_ARTIFACT_REPO_URL: https://artifactory.connectwisedev.com/artifactory
+    JOB_SRC_ARTIFACTORY_PATH: juno-ms-nonprod-local
+    JOB_TRG_ARTIFACTORY_PATH: juno-ms-prod-local
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_set_shared_vars
+    - "# --- set variables ---------------------------------------------------"
+    - export JOB_RELEASE_TAG=$CI_COMMIT_TAG
+    - export JOB_RELEASE_COMMIT_ID=$(git rev-parse $JOB_RELEASE_TAG)
+    - export JOB_IMAGE_SHA_TAG=sha-$JOB_RELEASE_COMMIT_ID
+    - "# --- set prev release pipeline IID to support artifactory promotion --"
+    - >-
+      export JOB_RELEASE_PIPELINE_IID=$(curl -s --header "PRIVATE-TOKEN: $BOT_GITLAB_TOKEN" $CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines?sha=$CI_COMMIT_SHA | jq ".[] | select(.ref==\"$CI_DEFAULT_BRANCH\")? | .iid")
+    - export STACK_VERSION_BUILD=${STACK_VERSION_BUILD//$CI_PIPELINE_IID/$JOB_RELEASE_PIPELINE_IID}
+    - printenv | grep -E "$CICD_VAR_PATTERN" | sort
+    - ""
+    - "# --- promoting artifact from nonprod to prod repo --------------------"
+    - curl -sSf -X POST
+      -u "${JOB_ARTIFACT_REPO_USER}:${JOB_ARTIFACT_REPO_PASS}"
+      -H 'content-type:Application/json'
+      -d '{"status":"prod-ready","sourceRepo":"'"${JOB_SRC_ARTIFACTORY_PATH}"'","targetRepo":"'"${JOB_TRG_ARTIFACTORY_PATH}"'","comment":"Auto Promotion in '"${JOB_TRG_ARTIFACTORY_PATH}"'","ciUser":"admin","dryRun":false,"copy":true,"artifacts":true,"dependencies":true,"scopes":["compile","runtime"],"failFast":true}'
+      "${JOB_ARTIFACT_REPO_URL}/api/build/promote/${CI_PROJECT_NAME}/${STACK_VERSION_BUILD}"
+    - ""
+
+.job-publish-artifact-dist:
+  image: 284702229816.dkr.ecr.us-east-1.amazonaws.com/pf-cicdenvs-core/default-loaded:v1
+
+.job-publish-artifact-dist-python:
+  extends: .job-publish-artifact-dist
+  variables:
+    JOB_ARTIFACT_REPO_URL: https://artifactory.connectwisedev.com
+    JOB_ARTIFACT_REPO_PATH: artifactory/api/pypi/pf-pypi-local
+    JOB_ARTIFACT_REPO_USER: $STACK_SERVICE_NAME
+    JOB_ARTIFACT_REPO_PASS: $ARTIFACTORY_DEPLOYER_SECRET
+  script:
+    - *snippet_print_ci_vars
+    - *snippet_print_deployer_info
+    - *snippet_set_shared_vars
+    - "# --- install dependencies --------------------------------------------"
+    - pip install twine
+    - ""
+    - "# --- set variables ---------------------------------------------------"
+    - export TWINE_USERNAME=${JOB_ARTIFACT_REPO_USER}
+    - export TWINE_PASSWORD=${JOB_ARTIFACT_REPO_PASS}
+    - export TWINE_REPOSITORY=${JOB_ARTIFACT_REPO_URL}/${JOB_ARTIFACT_REPO_PATH}
+    - export TWINE_REPOSITORY_URL=$TWINE_REPOSITORY
+    - export BASIC_AUTH_URL=$(echo $JOB_ARTIFACT_REPO_URL | sed "s,//,//${TWINE_USERNAME}:${TWINE_PASSWORD}@,")
+    - ""
+    - "# --- download existing build -----------------------------------------"
+    - pip download -i ${BASIC_AUTH_URL}/${JOB_ARTIFACT_REPO_PATH}/simple --no-deps $STACK_SERVICE_NAME==${STACK_VERSION_RELEASE}.dev${CI_COMMIT_SHA} --dest dist/
+    - ""
+    - "# --- publish artifacts as release ------------------------------------"
+    - |
+      for f in dist/*; do
+        mv "$f" $(echo $f | sed -E "s/(${STACK_VERSION_RELEASE})\.dev${CI_COMMIT_SHA}/\1/")
+      done
+    - twine upload --non-interactive dist/*
+    - ""
+
+.job-deploy-stack:
+  extends: .job-run-script
+  variables:
+    JOB_SCRIPT_PATH: devops/ci/ci_deploy.sh
+  artifacts:
+    reports:
+      dotenv: deploy.env
+    paths:
+      - dbtool_*.log
+    expire_in: 1 week
+
+.job-stop-stack:
+  extends: .job-run-script
+  variables:
+    JOB_SCRIPT_PATH: "devops/ci/ci_stop.sh"
+
+.job-reset-stack:
+  extends: .job-stop-stack
+  variables:
+    JOB_DELETE_STACK: 0
