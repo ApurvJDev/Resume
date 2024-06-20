@@ -1,0 +1,20 @@
+stages:
+  - build
+  - release
+
+build_job:
+  stage: build
+  script:
+    - echo "This is the build step."
+  artifacts:
+    paths:
+      - build/
+
+release_job:
+  stage: release
+  script:
+    - echo "Creating a new release"
+    - |
+      curl --request POST --header "PRIVATE-TOKEN: $GITLAB_TOKEN" --data "name=Release v${CI_PIPELINE_ID}&tag_name=v${CI_PIPELINE_ID}&ref=${CI_COMMIT_SHA}&description=Release for pipeline ${CI_PIPELINE_ID}" "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/releases"
+  only:
+    - main
