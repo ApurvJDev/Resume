@@ -1,0 +1,57 @@
+To update the `.version` file in the parent directory of your GitLab repository using `curl` and a GitLab project access token, you can create a job in your `gitlab-ci.yml` that uses the GitLab API to commit the changes. Here is an example:
+
+1. **Create a project access token in your GitLab project with `api` and `write_repository` scopes.**
+
+2. **Add the token as a secret variable in your GitLab CI/CD settings (e.g., `PROJECT_ACCESS_TOKEN`).**
+
+3. **Define the job in your `gitlab-ci.yml`:**
+
+```yaml
+stages:
+  - update_version
+
+variables:
+  FILE_PATH: ".version"
+  COMMIT_MESSAGE: "Update .version to $NEW_TAG"
+  BRANCH_NAME: "${CI_COMMIT_REF_NAME}"
+
+update_version:
+  stage: update_version
+  script:
+    - 'echo "$NEW_TAG" > ../$FILE_PATH'
+    - |
+      curl --request PUT --header "PRIVATE-TOKEN: ${PROJECT_ACCESS_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"branch\": \"${BRANCH_NAME}\",
+          \"commit_message\": \"${COMMIT_MESSAGE}\",
+          \"actions\": [
+            {
+              \"action\": \"update\",
+              \"file_path\": \"${FILE_PATH}\",
+              \"content\": \"$(cat ../$FILE_PATH)\"
+            }
+          ]
+        }" "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/repository/commits"
+  only:
+    - branches  # Specify the branches on which this job should run
+```
+
+### Explanation:
+
+- **stages:** Define the pipeline stages. Here, we have one stage named `update_version`.
+- **variables:** Define the necessary variables for the script:
+  - `FILE_PATH`: Path to the `.version` file.
+  - `COMMIT_MESSAGE`: Commit message for the change.
+  - `BRANCH_NAME`: The current branch name.
+- **update_version:** Define the job to update the `.version` file.
+- **script:** List of commands to be executed:
+  - `echo "$NEW_TAG" > ../$FILE_PATH`: Write the value of `$NEW_TAG` to the `.version` file.
+  - `curl --request PUT ...`: Use `curl` to make a PUT request to the GitLab API to commit the change. The `PRIVATE-TOKEN` header is set to the value of the `PROJECT_ACCESS_TOKEN` variable. The data payload contains the branch, commit message, and the file update action with the new content.
+
+### Notes:
+- **PROJECT_ACCESS_TOKEN:** Ensure that you have created a project access token with the appropriate scopes (`api` and `write_repository`) and added it as a secret variable in your GitLab CI/CD settings.
+- **File Path:** Adjust the `FILE_PATH` variable if your `.version` file is in a different directory.
+- **API Endpoint:** The GitLab API endpoint URL should be adjusted if your GitLab instance is self-hosted.
+
+This setup uses the GitLab API to update the `.version` file and commit the changes to the repository.
