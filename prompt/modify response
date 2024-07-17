@@ -1,0 +1,119 @@
+I am creating release notes using changelog api in prepare_notes. Then I am passing the release notes in release_notes.md file through artifacts to generate descriptive notes job which uses a python script to generate descriptive release notes. These descriptive release notes gets appended to release_notes.md file.Then I am using a release job to set the description with the release_notes.md file.These are the jobs I have in my release stage:
+
+prepare_notes:
+  stage: release
+  image: alpine:latest
+  rules:
+    - if: '$CI_COMMIT_TAG' # gets triggered at each tag push
+  # needs:
+  #   - job: bump_tag
+  script:
+    - apk add curl jq
+    # create release notes by using changelog api
+    - 'curl -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/changelog?version=$CI_COMMIT_TAG" | jq -r .notes > release_notes.md'
+    # - 'curl -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/changelog?version=$CI_COMMIT_TAG"'
+    # commit changes in changelog file in repository (optional)
+    # - 'curl -H "PRIVATE-TOKEN: $CI_API_TOKEN" -X POST "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/changelog?version=$CI_COMMIT_TAG"'
+  artifacts:
+    paths:
+      - release_notes.md
+
+generate_descriptive_notes:
+  stage: release
+  image: python:3.9-alpine
+  rules:
+    - if: '$CI_COMMIT_TAG' # gets triggered at each tag push
+  needs:
+    - job: prepare_notes
+      artifacts: true
+  before_script:
+    - pip install --upgrade pip
+    - pip install openai
+    - apk add curl jq
+    # - pip install groq
+    # - pip install google-generativeai
+  script:
+    - python nimLlama.py
+    - CHANGELOG=$(cat release_notes.md)
+    
+    - |
+      result=$(curl https://integrate.api.nvidia.com/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer API_KEY" \
+      -d '{
+        "model": "meta/llama3-70b-instruct",
+        "messages": [{"role":"user","content":"Write a sentence on AI"}],
+        "temperature": 1,   
+        "top_p": 1,
+        "max_tokens": 1024,
+        "stream": true                
+      }') 
+
+    - echo "$result"
+    - ""
+
+  artifacts:
+    paths:
+      - release_notes.md
+
+release_job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: generate_descriptive_notes
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - echo "Creating release"
+    - echo "$CI_COMMIT_TAG"
+  release:
+    name: '$CI_COMMIT_TAG' 
+    description: release_notes.md
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_SHA'
+
+This is my python script nimLlama.py responsible for generating desriptive release notes:
+from openai import OpenAI
+
+client = OpenAI(
+  base_url = "https://integrate.api.nvidia.com/v1",
+  api_key = "API_KEY"
+)
+
+f = open("notes.md", "r+")   
+data = f.read()
+
+completion = client.chat.completions.create(
+  model="meta/llama3-70b-instruct",
+  messages=[{"role":"user","content":"Generate descriptive release notes" + data}],
+  temperature=1,
+  top_p=1,
+  max_tokens=1024,
+  stream=True
+)
+
+text=""
+
+for chunk in completion:
+  if chunk.choices[0].delta.content is not None:
+    text += chunk.choices[0].delta.content or ""
+
+print(text)
+f.write("\n"+ text)  
+f.close()
+
+
+  What I am trying to do is use this curl command to do the same operation that the python script is doing. Modify the below command accordingly:
+ - |
+      result=$(curl https://integrate.api.nvidia.com/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer API_KEY" \
+      -d '{
+        "model": "meta/llama3-70b-instruct",
+        "messages": [{"role":"user","content":"Write a sentence on AI"}],
+        "temperature": 1,   
+        "top_p": 1,
+        "max_tokens": 1024,
+        "stream": true                
+      }') 
