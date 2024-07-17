@@ -117,3 +117,77 @@ f.close()
         "max_tokens": 1024,
         "stream": true                
       }') 
+
+FYI this is the response of the curl command when I prompt it to write a sentence on AI:
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":"\""},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":"Art"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":"ificial"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" intelligence"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" has"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" the"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" potential"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" to"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" revolution"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":"ize"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" numerous"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" industries"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" and"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" transform"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" the"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" way"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" humans"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" live"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" and"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" work"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":","},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" from"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" autom"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":"ating"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" mundane"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" tasks"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" to"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" providing"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" personalized"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" healthcare"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" and"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":" education"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":".\""},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"cmpl-e79681fe52e54d0eb877f9d595ed9b51","object":"chat.completion.chunk","created":1721214320,"model":"meta/llama3-70b-instruct","choices":[{"index":0,"delta":{"content":""},"finish_reason":"stop","stop_reason":128009}],"usage":{"prompt_tokens":15,"total_tokens":49,"completion_tokens":34}}
+
+data: [DONE]
+
