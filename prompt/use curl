@@ -1,7 +1,7 @@
 store the result of following curl command in a variable:
 curl https://integrate.api.nvidia.com/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer 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" \
+  -H "Authorization: Bearer YOUR API TOKEN" \
   -d '{
     "model": "meta/llama3-70b-instruct",
     "messages": [{"role":"user","content":"Write a sentence on AI"}],
