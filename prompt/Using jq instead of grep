@@ -1,0 +1,41 @@
+generate_descriptive_notes:
+  stage: release
+  image: python:3.9-alpine
+  rules:
+    - if: '$CI_COMMIT_TAG' # gets triggered at each tag push
+  needs:
+    - job: prepare_notes
+      artifacts: true
+  before_script:
+    - pip install --upgrade pip
+    - pip install openai
+    - apk add curl jq
+    # - pip install groq
+    # - pip install google-generativeai
+  script:
+    # Read the content of release_notes.md
+    - RELEASE_NOTES=$(cat release_notes.md)
+
+    # Use curl to send the request to the API
+    - |
+      result=$(curl -s https://integrate.api.nvidia.com/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer API_KEY" \
+      -d '{
+        "model": "meta/llama3-70b-instruct",
+        "messages": [{"role":"user","content":"Generate descriptive release notes: '"$RELEASE_NOTES"'"}],
+        "temperature": 1,   
+        "top_p": 1,
+        "max_tokens": 1024,
+        "stream": true                
+      }')
+
+    # Extract the content from the response
+    - DESCRIPTIVE_NOTES=$(echo "$result" | jq -r '.choices[].delta.content' | tr '\n' ' ')
+
+    # Append the descriptive notes to release_notes.md
+    - echo "$DESCRIPTIVE_NOTES" >> release_notes.md
+
+  artifacts:
+    paths:
+      - release_notes.md
